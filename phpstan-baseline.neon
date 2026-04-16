@@ -1,0 +1,76 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 2
+			path: src/Async/AnalysisResult.php
+
+		-
+			message: "#^Call to static method connection\\(\\) on an unknown class DB\\.$#"
+			count: 1
+			path: src/Commands/HealthCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\$default of method Illuminate\\\\Http\\\\Request\\:\\:header\\(\\) expects array\\|string\\|null, int given\\.$#"
+			count: 1
+			path: src/Guards/HttpGuard.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Throwable\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: src/Guards/QueueGuard.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 3
+			path: src/Guards/Upload/ContentScannerV2.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 3
+			path: src/Guards/Upload/MagicByteValidator.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 3
+			path: src/Guards/Upload/PolyglotDetector.php
+
+		-
+			message: "#^Call to an undefined method DateTimeInterface\\:\\:toIso8601String\\(\\)\\.$#"
+			count: 1
+			path: src/Intelligence/ThreatFingerprint.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Intelligence/ThreatFingerprint.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 4
+			path: src/Policy/PolicyDecision.php
+
+		-
+			message: "#^Cannot call method toArray\\(\\) on array\\.$#"
+			count: 1
+			path: src/Policy/PolicyLoader.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<int,VendorShield\\\\Shield\\\\Contracts\\\\PolicyContract\\>\\:\\:filter\\(\\) expects \\(callable\\(VendorShield\\\\Shield\\\\Contracts\\\\PolicyContract, int\\)\\: bool\\)\\|null, Closure\\(VendorShield\\\\Shield\\\\Policy\\\\ConfigPolicy\\)\\: bool given\\.$#"
+			count: 1
+			path: src/Policy/PolicyLoader.php
+
+		-
+			message: "#^If condition is always false\\.$#"
+			count: 1
+			path: src/Runtime/RuntimeHookManager.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 3
+			path: src/Support/GuardResult.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#1 \\$key \\(string\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/Tenant/TenantContext.php

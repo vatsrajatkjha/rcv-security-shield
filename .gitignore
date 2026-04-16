@@ -1,0 +1,26 @@
+/vendor/
+/.phpunit.cache/
+/.idea/
+/.vscode/
+/.env
+/storage/*.key
+/storage/app/shield/quarantine/
+/storage/app/shield/scanned/
+.DS_Store
+*.bak
+*.tmp
+composer.lock
+laravel_shield_enterprise_architecture_docs.md
+laravel_shield_git_hub_readme_docs_structure.md
+
+# Additional ignores for open-source package
+var/
+node_modules/
+.phpunit.result.cache
+coverage/
+*.log
+Thumbs.db
+.env*
+.nyc_output/
+.phpunit.result.cache
+tests/test_script.php
