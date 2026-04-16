@@ -4,8 +4,7 @@
     "keywords": ["laravel", "security", "rasp", "runtime-security", "waf", "enterprise"],
     "authors": [
         {
-            "name": "Rajat Kumar Jha",
-            "organization": "RCV Technologies"
+            "name": "Rajat Kumar Jha"
         }
     ],
     "license": "MIT",
