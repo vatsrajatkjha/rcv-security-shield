@@ -2,9 +2,9 @@
 
 namespace VendorShield\Shield\Audit;
 
-use VendorShield\Shield\Contracts\AuditDriverContract;
-use VendorShield\Shield\Config\ConfigResolver;
 use Illuminate\Support\Facades\DB;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\AuditDriverContract;
 
 class DatabaseAuditDriver implements AuditDriverContract
 {

@@ -4,13 +4,13 @@ namespace VendorShield\Shield\Guards;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Support\GuardResult;
+use Throwable;
 use VendorShield\Shield\Audit\AuditLogger;
+use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Events\GuardTriggered;
 use VendorShield\Shield\Support\FailSafe;
-use Throwable;
+use VendorShield\Shield\Support\GuardResult;
+use VendorShield\Shield\Support\Severity;
 
 /**
  * Exception guard — decorates the Laravel exception handler.

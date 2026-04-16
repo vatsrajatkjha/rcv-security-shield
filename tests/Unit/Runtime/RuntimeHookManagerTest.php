@@ -2,9 +2,9 @@
 
 namespace VendorShield\Shield\Tests\Unit\Runtime;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\Runtime\RuntimeHookManager;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Runtime\RuntimeHookManager;
+use VendorShield\Shield\Tests\TestCase;
 
 class RuntimeHookManagerTest extends TestCase
 {

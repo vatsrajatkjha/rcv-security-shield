@@ -2,11 +2,11 @@
 
 namespace VendorShield\Shield\Audit;
 
-use VendorShield\Shield\Contracts\AuditDriverContract;
+use VendorShield\Shield\Async\AnalysisResult;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Support\GuardResult;
 use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Async\AnalysisResult;
 
 class AuditLogger
 {

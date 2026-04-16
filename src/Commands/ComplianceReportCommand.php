@@ -70,7 +70,7 @@ class ComplianceReportCommand extends Command
 
         // Save report
         $output = $this->option('output')
-            ?? storage_path("shield/{$type}_report_" . now()->format('Y_m_d_His') . '.json');
+            ?? storage_path("shield/{$type}_report_".now()->format('Y_m_d_His').'.json');
 
         $dir = dirname($output);
         FailSafe::ensureDirectory($dir);

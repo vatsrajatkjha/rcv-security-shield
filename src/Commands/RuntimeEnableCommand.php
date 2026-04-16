@@ -38,7 +38,7 @@ class RuntimeEnableCommand extends Command
 
     protected function toggleGuard(string $guard, bool $enable): void
     {
-        $envKey = 'SHIELD_' . strtoupper($guard) . '_ENABLED';
+        $envKey = 'SHIELD_'.strtoupper($guard).'_ENABLED';
         $this->updateEnvValue($envKey, $enable ? 'true' : 'false');
 
         $status = $enable ? 'enabled' : 'disabled';
@@ -52,6 +52,7 @@ class RuntimeEnableCommand extends Command
 
         if (! file_exists($envPath)) {
             $this->components->error('.env file not found');
+
             return;
         }
 

@@ -16,18 +16,18 @@ class PolyglotDetector
      * Known file magic signatures for polyglot header scan.
      */
     protected const FILE_HEADERS = [
-        'jpeg'  => "\xFF\xD8\xFF",
-        'png'   => "\x89\x50\x4E\x47",
-        'gif87' => "GIF87a",
-        'gif89' => "GIF89a",
-        'pdf'   => "%PDF",
-        'zip'   => "PK\x03\x04",
-        'rar'   => "Rar!",
-        'gzip'  => "\x1f\x8b",
-        'bmp'   => "BM",
-        'ole2'  => "\xD0\xCF\x11\xE0",
-        'elf'   => "\x7FELF",
-        'mz'    => "MZ",       // PE/EXE
+        'jpeg' => "\xFF\xD8\xFF",
+        'png' => "\x89\x50\x4E\x47",
+        'gif87' => 'GIF87a',
+        'gif89' => 'GIF89a',
+        'pdf' => '%PDF',
+        'zip' => "PK\x03\x04",
+        'rar' => 'Rar!',
+        'gzip' => "\x1f\x8b",
+        'bmp' => 'BM',
+        'ole2' => "\xD0\xCF\x11\xE0",
+        'elf' => "\x7FELF",
+        'mz' => 'MZ',       // PE/EXE
     ];
 
     /**
@@ -77,10 +77,8 @@ class PolyglotDetector
     /**
      * Scan a file for polyglot characteristics.
      *
-     * @param string $filePath Path to the uploaded file.
-     * @param string $declaredMime The declared MIME type.
-     *
-     * @return PolyglotResult
+     * @param  string  $filePath  Path to the uploaded file.
+     * @param  string  $declaredMime  The declared MIME type.
      */
     public function scan(string $filePath, string $declaredMime): PolyglotResult
     {
@@ -149,7 +147,7 @@ class PolyglotDetector
         if (count($detectedTypes) > 1) {
             $findings[] = [
                 'type' => 'multi_header',
-                'detail' => 'Multiple file type signatures detected: ' . implode(', ', $detectedTypes),
+                'detail' => 'Multiple file type signatures detected: '.implode(', ', $detectedTypes),
                 'detected_types' => $detectedTypes,
             ];
         }
@@ -189,6 +187,7 @@ class PolyglotDetector
                             'offset' => $offset,
                         ];
                         fclose($handle);
+
                         return $findings; // One finding is enough to flag
                     }
                 }

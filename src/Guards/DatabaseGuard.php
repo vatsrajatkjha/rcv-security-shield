@@ -3,14 +3,14 @@
 namespace VendorShield\Shield\Guards;
 
 use Illuminate\Database\Events\QueryExecuted;
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
+use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Events\ThreatDetected;
+use VendorShield\Shield\Support\FailSafe;
 use VendorShield\Shield\Support\GuardResult;
 use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Events\ThreatDetected;
-use VendorShield\Shield\Events\GuardTriggered;
-use VendorShield\Shield\Support\FailSafe;
 
 class DatabaseGuard implements GuardContract
 {
@@ -110,6 +110,7 @@ class DatabaseGuard implements GuardContract
         foreach ($results as $result) {
             if (! $result->passed) {
                 $this->handleResult($result);
+
                 return $result;
             }
         }

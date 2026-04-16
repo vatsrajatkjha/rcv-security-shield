@@ -2,8 +2,8 @@
 
 namespace VendorShield\Shield\Audit;
 
-use VendorShield\Shield\Contracts\AuditDriverContract;
 use Illuminate\Support\Facades\Log;
+use VendorShield\Shield\Contracts\AuditDriverContract;
 
 class LogAuditDriver implements AuditDriverContract
 {

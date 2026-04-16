@@ -2,13 +2,13 @@
 
 namespace VendorShield\Shield;
 
+use Illuminate\Contracts\Foundation\Application;
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Tenant\TenantContext;
-use VendorShield\Shield\Audit\AuditLogger;
-use Illuminate\Contracts\Foundation\Application;
 
 class ShieldManager
 {
@@ -67,6 +67,7 @@ class ShieldManager
         // Lazy resolution: construct on first access
         if (isset($this->lazyGuards[$name])) {
             $this->guards[$name] = $this->app->make($this->lazyGuards[$name]);
+
             return $this->guards[$name];
         }
 

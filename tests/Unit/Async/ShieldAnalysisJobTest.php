@@ -2,11 +2,11 @@
 
 namespace VendorShield\Shield\Tests\Unit\Async;
 
-use VendorShield\Shield\Tests\TestCase;
+use Illuminate\Support\Facades\Event;
 use VendorShield\Shield\Async\ShieldAnalysisJob;
 use VendorShield\Shield\Audit\AuditLogger;
-use Illuminate\Support\Facades\Event;
 use VendorShield\Shield\Events\AnalysisCompleted;
+use VendorShield\Shield\Tests\TestCase;
 
 class ShieldAnalysisJobTest extends TestCase
 {
@@ -36,12 +36,12 @@ class ShieldAnalysisJobTest extends TestCase
 
     public function test_it_detects_zip_slip_in_archives()
     {
-        if (!class_exists('ZipArchive')) {
+        if (! class_exists('ZipArchive')) {
             $this->markTestSkipped('ZipArchive extension not available.');
         }
 
         $tmp = tempnam(sys_get_temp_dir(), 'zip');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE);
         $zip->addFromString('../../../../etc/passwd', 'fake content');
         $zip->close();
@@ -56,7 +56,7 @@ class ShieldAnalysisJobTest extends TestCase
         $job->handle($audit);
 
         Event::assertDispatched(AnalysisCompleted::class, function ($event) {
-            return $event->result->clean === false 
+            return $event->result->clean === false
                 && str_contains($event->result->findings[0]['type'], 'zip_slip');
         });
 
@@ -65,15 +65,15 @@ class ShieldAnalysisJobTest extends TestCase
 
     public function test_it_detects_archive_bomb_by_compression_ratio()
     {
-        if (!class_exists('ZipArchive')) {
+        if (! class_exists('ZipArchive')) {
             $this->markTestSkipped('ZipArchive extension not available.');
         }
 
         $tmp = tempnam(sys_get_temp_dir(), 'zip');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE);
         // Add 101MB of highly compressible data (A's)
-        $zip->addFromString('bomb.txt', str_repeat('A', 104857601)); 
+        $zip->addFromString('bomb.txt', str_repeat('A', 104857601));
         $zip->close();
 
         $job = new ShieldAnalysisJob([
@@ -86,7 +86,7 @@ class ShieldAnalysisJobTest extends TestCase
         $job->handle($audit);
 
         Event::assertDispatched(AnalysisCompleted::class, function ($event) {
-            return $event->result->clean === false 
+            return $event->result->clean === false
                 && str_contains($event->result->findings[0]['type'], 'archive_bomb');
         });
 

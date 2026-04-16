@@ -47,6 +47,7 @@ class BaselineCommand extends Command
                 'status' => ! $debugEnabled ? 'pass' : 'warning',
                 'detail' => $debugEnabled ? 'Debug mode is enabled — disable in production' : 'Debug mode disabled',
             ];
+
             return ! $debugEnabled;
         });
 
@@ -56,6 +57,7 @@ class BaselineCommand extends Command
                 'status' => $hasKey ? 'pass' : 'fail',
                 'detail' => $hasKey ? 'APP_KEY is set' : 'APP_KEY is missing',
             ];
+
             return $hasKey;
         });
 
@@ -65,6 +67,7 @@ class BaselineCommand extends Command
                 'status' => $forcesHttps ? 'pass' : 'info',
                 'detail' => $forcesHttps ? 'HTTPS is enforced' : 'HTTPS not detected in APP_URL',
             ];
+
             return $forcesHttps;
         });
 
@@ -76,11 +79,12 @@ class BaselineCommand extends Command
                 'secure_cookie' => $secure,
                 'http_only' => $httpOnly,
             ];
+
             return $secure && $httpOnly;
         });
 
         // Output
-        $output = $this->option('output') ?? storage_path('shield/baseline_' . now()->format('Y_m_d_His') . '.json');
+        $output = $this->option('output') ?? storage_path('shield/baseline_'.now()->format('Y_m_d_His').'.json');
         $dir = dirname($output);
         FailSafe::ensureDirectory($dir);
 

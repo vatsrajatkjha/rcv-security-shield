@@ -2,9 +2,9 @@
 
 namespace VendorShield\Shield\Intelligence;
 
-use VendorShield\Shield\Contracts\IntelligenceClientContract;
-use VendorShield\Shield\Config\ConfigResolver;
 use Illuminate\Support\Facades\Http;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\IntelligenceClientContract;
 
 class IntelligenceClient implements IntelligenceClientContract
 {

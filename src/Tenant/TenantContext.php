@@ -5,6 +5,7 @@ namespace VendorShield\Shield\Tenant;
 class TenantContext
 {
     protected ?string $tenantId = null;
+
     protected array $metadata = [];
 
     /**
@@ -35,7 +36,7 @@ class TenantContext
     /**
      * Get tenant metadata.
      */
-    public function metadata(string $key = null, mixed $default = null): mixed
+    public function metadata(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->metadata;

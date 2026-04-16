@@ -2,44 +2,45 @@
 
 namespace VendorShield\Shield;
 
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\ServiceProvider;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Runtime\RuntimeHookManager;
-use VendorShield\Shield\Guards\HttpGuard;
-use VendorShield\Shield\Guards\DatabaseGuard;
-use VendorShield\Shield\Guards\UploadGuard;
-use VendorShield\Shield\Guards\Upload\FilenameCanonicalizer;
-use VendorShield\Shield\Guards\Upload\RecursiveDecoder;
-use VendorShield\Shield\Guards\Upload\MagicByteValidator;
-use VendorShield\Shield\Guards\Upload\PolyglotDetector;
-use VendorShield\Shield\Guards\Upload\ContentScannerV2;
-use VendorShield\Shield\Guards\Upload\SafeStoragePolicy;
-use VendorShield\Shield\Guards\Upload\StreamProcessor;
-use VendorShield\Shield\Guards\Upload\ArchiveInspector;
-use VendorShield\Shield\Guards\QueueGuard;
-use VendorShield\Shield\Guards\AuthGuard;
-use VendorShield\Shield\Guards\CacheGuard;
-use VendorShield\Shield\Guards\TenantGuard;
-use VendorShield\Shield\Policy\PolicyEngine;
-use VendorShield\Shield\Policy\PolicyLoader;
-use VendorShield\Shield\Tenant\TenantContext;
-use VendorShield\Shield\Tenant\HeaderTenantResolver;
-use VendorShield\Shield\Intelligence\IntelligenceClient;
-use VendorShield\Shield\Intelligence\NullIntelligenceClient;
+use Laravel\Octane\Events\RequestReceived;
 use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Audit\DatabaseAuditDriver;
 use VendorShield\Shield\Audit\LogAuditDriver;
 use VendorShield\Shield\Audit\NullAuditDriver;
-use VendorShield\Shield\Contracts\GuardContract;
+use VendorShield\Shield\Commands\BaselineCommand;
+use VendorShield\Shield\Commands\ComplianceReportCommand;
+use VendorShield\Shield\Commands\HealthCommand;
+use VendorShield\Shield\Commands\InstallCommand;
+use VendorShield\Shield\Commands\RuntimeEnableCommand;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\AuditDriverContract;
+use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Contracts\PolicyLoaderContract;
 use VendorShield\Shield\Contracts\TenantResolverContract;
-use VendorShield\Shield\Contracts\IntelligenceClientContract;
-use VendorShield\Shield\Contracts\AuditDriverContract;
-use VendorShield\Shield\Commands\InstallCommand;
-use VendorShield\Shield\Commands\HealthCommand;
-use VendorShield\Shield\Commands\BaselineCommand;
-use VendorShield\Shield\Commands\RuntimeEnableCommand;
-use VendorShield\Shield\Commands\ComplianceReportCommand;
+use VendorShield\Shield\Guards\AuthGuard;
+use VendorShield\Shield\Guards\CacheGuard;
+use VendorShield\Shield\Guards\DatabaseGuard;
+use VendorShield\Shield\Guards\HttpGuard;
+use VendorShield\Shield\Guards\QueueGuard;
+use VendorShield\Shield\Guards\TenantGuard;
+use VendorShield\Shield\Guards\Upload\ArchiveInspector;
+use VendorShield\Shield\Guards\Upload\ContentScannerV2;
+use VendorShield\Shield\Guards\Upload\FilenameCanonicalizer;
+use VendorShield\Shield\Guards\Upload\MagicByteValidator;
+use VendorShield\Shield\Guards\Upload\PolyglotDetector;
+use VendorShield\Shield\Guards\Upload\RecursiveDecoder;
+use VendorShield\Shield\Guards\Upload\SafeStoragePolicy;
+use VendorShield\Shield\Guards\Upload\StreamProcessor;
+use VendorShield\Shield\Guards\UploadGuard;
+use VendorShield\Shield\Intelligence\IntelligenceClient;
+use VendorShield\Shield\Intelligence\NullIntelligenceClient;
+use VendorShield\Shield\Policy\PolicyEngine;
+use VendorShield\Shield\Policy\PolicyLoader;
+use VendorShield\Shield\Runtime\RuntimeHookManager;
+use VendorShield\Shield\Tenant\HeaderTenantResolver;
+use VendorShield\Shield\Tenant\TenantContext;
 
 class ShieldServiceProvider extends ServiceProvider
 {
@@ -48,7 +49,7 @@ class ShieldServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/shield.php', 'shield');
+        $this->mergeConfigFrom(__DIR__.'/../config/shield.php', 'shield');
 
         // Core — ConfigResolver (singleton)
         $this->app->singleton(ConfigResolver::class, function ($app) {
@@ -59,6 +60,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(ShieldManager::class, function ($app) {
             $manager = new ShieldManager($app, $app->make(ConfigResolver::class));
             $this->registerGuards($manager);
+
             return $manager;
         });
 
@@ -66,7 +68,7 @@ class ShieldServiceProvider extends ServiceProvider
 
         // Tenant Context — scoped singleton (Octane-safe)
         $this->app->scoped(TenantContext::class, function () {
-            return new TenantContext();
+            return new TenantContext;
         });
 
         // Tenant Resolver
@@ -89,7 +91,7 @@ class ShieldServiceProvider extends ServiceProvider
             return match ($driver) {
                 'database' => new DatabaseAuditDriver($config),
                 'log' => new LogAuditDriver($config->get('audit.channel')),
-                'null' => new NullAuditDriver(),
+                'null' => new NullAuditDriver,
                 default => new DatabaseAuditDriver($config),
             };
         });
@@ -126,14 +128,14 @@ class ShieldServiceProvider extends ServiceProvider
             return new UploadGuard(
                 $config,
                 $app->make(AuditLogger::class),
-                new FilenameCanonicalizer(),
+                new FilenameCanonicalizer,
                 $decoder,
-                new MagicByteValidator(),
-                new PolyglotDetector(),
+                new MagicByteValidator,
+                new PolyglotDetector,
                 new ContentScannerV2($decoder),
-                new SafeStoragePolicy(),
-                new StreamProcessor(),
-                new ArchiveInspector(),
+                new SafeStoragePolicy,
+                new StreamProcessor,
+                new ArchiveInspector,
             );
         });
 
@@ -169,7 +171,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(PolicyLoaderContract::class, function ($app) {
             return new PolicyLoader(
                 $app->make(ConfigResolver::class),
-                $app->make(\Illuminate\Contracts\Cache\Repository::class),
+                $app->make(Repository::class),
             );
         });
 
@@ -188,7 +190,7 @@ class ShieldServiceProvider extends ServiceProvider
                 return new IntelligenceClient($config);
             }
 
-            return new NullIntelligenceClient();
+            return new NullIntelligenceClient;
         });
 
         // Runtime Hook Manager
@@ -249,7 +251,7 @@ class ShieldServiceProvider extends ServiceProvider
     protected function publishConfig(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/shield.php' => config_path('shield.php'),
+            __DIR__.'/../config/shield.php' => config_path('shield.php'),
         ], 'shield-config');
     }
 
@@ -259,10 +261,10 @@ class ShieldServiceProvider extends ServiceProvider
     protected function publishMigrations(): void
     {
         $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
+            __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'shield-migrations');
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     /**
@@ -286,9 +288,9 @@ class ShieldServiceProvider extends ServiceProvider
      */
     protected function registerOctaneResets(): void
     {
-        if (class_exists(\Laravel\Octane\Events\RequestReceived::class)) {
+        if (class_exists(RequestReceived::class)) {
             $this->app['events']->listen(
-                \Laravel\Octane\Events\RequestReceived::class,
+                RequestReceived::class,
                 function () {
                     $this->app->make(ShieldManager::class)->reset();
                     $this->app->make(TenantContext::class)->clear();

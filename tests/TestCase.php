@@ -3,6 +3,7 @@
 namespace VendorShield\Shield\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use VendorShield\Shield\Facades\Shield;
 use VendorShield\Shield\ShieldServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
@@ -17,7 +18,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageAliases($app): array
     {
         return [
-            'Shield' => \VendorShield\Shield\Facades\Shield::class,
+            'Shield' => Shield::class,
         ];
     }
 

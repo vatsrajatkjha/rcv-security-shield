@@ -2,10 +2,14 @@
 
 namespace VendorShield\Shield\Tests\Unit\Guards;
 
-use VendorShield\Shield\Tests\TestCase;
+use Illuminate\Http\UploadedFile;
+use VendorShield\Shield\Guards\Upload\ContentScannerV2;
+use VendorShield\Shield\Guards\Upload\FilenameCanonicalizer;
+use VendorShield\Shield\Guards\Upload\RecursiveDecoder;
+use VendorShield\Shield\Guards\Upload\SafeStoragePolicy;
 use VendorShield\Shield\Guards\UploadGuard;
 use VendorShield\Shield\Support\Severity;
-use Illuminate\Http\UploadedFile;
+use VendorShield\Shield\Tests\TestCase;
 
 class UploadGuardTest extends TestCase
 {
@@ -72,8 +76,10 @@ class UploadGuardTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, '1234');
 
-        $file = new class($tmp, 'passwd.jpg', 'image/jpeg', null, true) extends UploadedFile {
-            public function getClientOriginalName(): string {
+        $file = new class($tmp, 'passwd.jpg', 'image/jpeg', null, true) extends UploadedFile
+        {
+            public function getClientOriginalName(): string
+            {
                 return '../../../../etc/passwd.jpg';
             }
         };
@@ -196,7 +202,7 @@ class UploadGuardTest extends TestCase
 
     public function test_base64_encoded_php_in_content_is_rejected(): void
     {
-        // Pre-computed base64 of: <?php system("id"); ?>
+        // Pre-computed base64 of: <?php system("id");?>
         $payload = 'PD9waHAgc3lzdGVtKCJpZCIpOyA/Pg==';
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, "safe content here " . $payload);
@@ -355,7 +361,7 @@ class UploadGuardTest extends TestCase
         // Place PHP payload after the traditional 8KB scan boundary
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         $padding = str_repeat('A', 8194);
-        file_put_contents($tmp, $padding . '<?php system("id"); ?>');
+        file_put_contents($tmp, $padding.'<?php system("id"); ?>');
 
         $file = new UploadedFile($tmp, 'large.txt', 'text/plain', null, true);
         $result = $this->guard->handle($file);
@@ -369,7 +375,7 @@ class UploadGuardTest extends TestCase
     {
         // Fake JPEG with PHP tag in content
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        file_put_contents($tmp, "\xFF\xD8\xFF" . "<html><body><?php system(\$_GET['cmd']); ?></body></html>");
+        file_put_contents($tmp, "\xFF\xD8\xFF"."<html><body><?php system(\$_GET['cmd']); ?></body></html>");
 
         $file = new UploadedFile($tmp, 'image.jpg', 'image/jpeg', null, true);
         $result = $this->guard->handle($file);
@@ -381,7 +387,7 @@ class UploadGuardTest extends TestCase
     public function test_shorthand_php_tag_is_rejected(): void
     {
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        file_put_contents($tmp, "hello <?=`ls`;?>");
+        file_put_contents($tmp, 'hello <?=`ls`;?>');
 
         $file = new UploadedFile($tmp, 'script.txt', 'text/plain', null, true);
         $result = $this->guard->handle($file);
@@ -403,7 +409,7 @@ class UploadGuardTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         $jpeg_header = "\xFF\xD8\xFF\xE0\x00\x10JFIF\x00\x01";
         $php_payload = '<?php system($_GET["cmd"]); ?>';
-        file_put_contents($tmp, $jpeg_header . str_repeat("\x00", 100) . $php_payload);
+        file_put_contents($tmp, $jpeg_header.str_repeat("\x00", 100).$php_payload);
 
         $file = new UploadedFile($tmp, 'photo.jpg', 'image/jpeg', null, true);
         $result = $this->guard->handle($file);
@@ -416,7 +422,7 @@ class UploadGuardTest extends TestCase
     public function test_polyglot_gif_php_is_rejected(): void
     {
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        file_put_contents($tmp, "GIF89a" . '<?php eval($_POST["x"]); ?>');
+        file_put_contents($tmp, 'GIF89a'.'<?php eval($_POST["x"]); ?>');
 
         $file = new UploadedFile($tmp, 'image.gif', 'image/gif', null, true);
         $result = $this->guard->handle($file);
@@ -436,11 +442,15 @@ class UploadGuardTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, 'clean content');
 
-        $file = new class($tmp, 'shell', 'application/octet-stream', null, true) extends UploadedFile {
-            public function getClientOriginalName(): string {
+        $file = new class($tmp, 'shell', 'application/octet-stream', null, true) extends UploadedFile
+        {
+            public function getClientOriginalName(): string
+            {
                 return 'shell';
             }
-            public function getClientOriginalExtension(): string {
+
+            public function getClientOriginalExtension(): string
+            {
                 return '';
             }
         };
@@ -462,18 +472,25 @@ class UploadGuardTest extends TestCase
         // \xCF\x81 = ρ (Greek rho), \xD1\x85 = х (Cyrillic ha)
         $fakeName = "shell.\xCF\x81h\xCF\x81"; // "shell.ρhρ" looks like "shell.php"
 
-        $file = new class($tmp, $fakeName, 'application/octet-stream', null, true) extends UploadedFile {
+        $file = new class($tmp, $fakeName, 'application/octet-stream', null, true) extends UploadedFile
+        {
             private string $fakeName;
+
             public function __construct(string $path, string $fakeName, ?string $mime, ?int $error, bool $test)
             {
                 $this->fakeName = $fakeName;
                 parent::__construct($path, $fakeName, $mime, $error, $test);
             }
-            public function getClientOriginalName(): string {
+
+            public function getClientOriginalName(): string
+            {
                 return $this->fakeName;
             }
-            public function getClientOriginalExtension(): string {
+
+            public function getClientOriginalExtension(): string
+            {
                 $parts = explode('.', $this->fakeName);
+
                 return end($parts);
             }
         };
@@ -491,8 +508,10 @@ class UploadGuardTest extends TestCase
         file_put_contents($tmp, 'clean');
 
         // %252e%252e%252f = double-encoded ../
-        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile {
-            public function getClientOriginalName(): string {
+        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile
+        {
+            public function getClientOriginalName(): string
+            {
                 return '%252e%252e%252fpasswd.jpg';
             }
         };
@@ -506,7 +525,7 @@ class UploadGuardTest extends TestCase
 
     public function test_burpsuite_null_byte_filename(): void
     {
-        $file = UploadedFile::fake()->create("shell.php%00.jpg", 100, 'image/jpeg');
+        $file = UploadedFile::fake()->create('shell.php%00.jpg', 100, 'image/jpeg');
         $result = $this->guard->handle($file);
 
         $this->assertFalse($result->passed);
@@ -515,7 +534,7 @@ class UploadGuardTest extends TestCase
 
     public function test_rtlo_character_injection_is_rejected(): void
     {
-        $file = UploadedFile::fake()->create("image%E2%80%AEjpg.php", 100, 'image/jpeg');
+        $file = UploadedFile::fake()->create('image%E2%80%AEjpg.php', 100, 'image/jpeg');
         $result = $this->guard->handle($file);
 
         $this->assertFalse($result->passed);
@@ -527,7 +546,8 @@ class UploadGuardTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, "\xFF\xD8\xFF\xE0\x00\x10JFIF\x00\x01");
 
-        $file = new class($tmp, 'photo.jpg', 'image/jpeg', null, true) extends UploadedFile {
+        $file = new class($tmp, 'photo.jpg', 'image/jpeg', null, true) extends UploadedFile
+        {
             public function getClientMimeType(): string
             {
                 return 'text/x-php';
@@ -560,7 +580,7 @@ class UploadGuardTest extends TestCase
         }
 
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $zip->addFromString('readme.txt', 'safe');
         $zip->close();
@@ -583,7 +603,7 @@ class UploadGuardTest extends TestCase
         $guard = $this->app->make(UploadGuard::class);
 
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $zip->addFromString('../escape.txt', 'owned');
         $zip->close();
@@ -646,7 +666,7 @@ class UploadGuardTest extends TestCase
         $guard = $this->app->make(UploadGuard::class);
 
         $tmp = tempnam(sys_get_temp_dir(), 'test');
-        file_put_contents($tmp, "mark /OutputFile (%pipe%id) currentdevice putdeviceprops");
+        file_put_contents($tmp, 'mark /OutputFile (%pipe%id) currentdevice putdeviceprops');
 
         $file = new UploadedFile($tmp, 'exploit.ps', 'application/postscript', null, true);
         $result = $guard->handle($file);
@@ -755,11 +775,15 @@ class UploadGuardTest extends TestCase
         file_put_contents($tmp, 'content');
 
         // Create a file object that simulates an inaccessible stream
-        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile {
-            public function getRealPath(): string|false {
+        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile
+        {
+            public function getRealPath(): string|false
+            {
                 return false;
             }
-            public function getPathname(): string {
+
+            public function getPathname(): string
+            {
                 return '/nonexistent/path/file.jpg';
             }
         };
@@ -778,11 +802,15 @@ class UploadGuardTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, 'content');
 
-        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile {
-            public function getRealPath(): string|false {
+        $file = new class($tmp, 'file.jpg', 'image/jpeg', null, true) extends UploadedFile
+        {
+            public function getRealPath(): string|false
+            {
                 return false;
             }
-            public function getPathname(): string {
+
+            public function getPathname(): string
+            {
                 return '/nonexistent/path/file.jpg';
             }
         };
@@ -830,7 +858,7 @@ class UploadGuardTest extends TestCase
 
     public function test_recursive_decoder_double_url_decoding(): void
     {
-        $decoder = new \VendorShield\Shield\Guards\Upload\RecursiveDecoder(5);
+        $decoder = new RecursiveDecoder(5);
 
         // Double URL encoded <?php
         $encoded = '%253C%253Fphp';
@@ -841,7 +869,7 @@ class UploadGuardTest extends TestCase
 
     public function test_recursive_decoder_hex_decoding(): void
     {
-        $decoder = new \VendorShield\Shield\Guards\Upload\RecursiveDecoder(5);
+        $decoder = new RecursiveDecoder(5);
 
         $encoded = '\x3C\x3Fphp system("id");';
         $decoded = $decoder->decode($encoded);
@@ -851,7 +879,7 @@ class UploadGuardTest extends TestCase
 
     public function test_filename_canonicalizer_homoglyph_normalization(): void
     {
-        $canonicalizer = new \VendorShield\Shield\Guards\Upload\FilenameCanonicalizer();
+        $canonicalizer = new FilenameCanonicalizer;
 
         // Greek rho ρ (U+03C1) should normalize to 'p'
         $result = $canonicalizer->canonicalize("shell.\xCF\x81h\xCF\x81");
@@ -862,7 +890,7 @@ class UploadGuardTest extends TestCase
 
     public function test_filename_canonicalizer_traversal_stripping(): void
     {
-        $canonicalizer = new \VendorShield\Shield\Guards\Upload\FilenameCanonicalizer();
+        $canonicalizer = new FilenameCanonicalizer;
 
         $result = $canonicalizer->canonicalize('../../../../etc/passwd.jpg');
 
@@ -872,7 +900,7 @@ class UploadGuardTest extends TestCase
 
     public function test_filename_canonicalizer_extensionless_detection(): void
     {
-        $canonicalizer = new \VendorShield\Shield\Guards\Upload\FilenameCanonicalizer();
+        $canonicalizer = new FilenameCanonicalizer;
 
         $this->assertTrue($canonicalizer->isExtensionless('shell'));
         $this->assertFalse($canonicalizer->isExtensionless('image.jpg'));
@@ -880,7 +908,7 @@ class UploadGuardTest extends TestCase
 
     public function test_filename_canonicalizer_random_generation(): void
     {
-        $canonicalizer = new \VendorShield\Shield\Guards\Upload\FilenameCanonicalizer();
+        $canonicalizer = new FilenameCanonicalizer;
 
         $name1 = $canonicalizer->generateStorageFilename('jpg');
         $name2 = $canonicalizer->generateStorageFilename('jpg');
@@ -892,7 +920,7 @@ class UploadGuardTest extends TestCase
 
     public function test_content_scanner_v2_detects_obfuscated_function(): void
     {
-        $scanner = new \VendorShield\Shield\Guards\Upload\ContentScannerV2();
+        $scanner = new ContentScannerV2;
 
         $tmp = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmp, '<?php $f="system"; $f("id"); ?>');
@@ -904,12 +932,12 @@ class UploadGuardTest extends TestCase
 
     public function test_safe_storage_policy_hash_sharding(): void
     {
-        $policy = new \VendorShield\Shield\Guards\Upload\SafeStoragePolicy();
+        $policy = new SafeStoragePolicy;
 
         $hash = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6';
         $path = $policy->generateShardedPath($hash);
 
-        $this->assertEquals('a1' . DIRECTORY_SEPARATOR . 'b2', $path);
+        $this->assertEquals('a1'.DIRECTORY_SEPARATOR.'b2', $path);
     }
 
     /*

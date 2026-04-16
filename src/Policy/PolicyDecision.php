@@ -5,8 +5,11 @@ namespace VendorShield\Shield\Policy;
 class PolicyDecision
 {
     public const ALLOW = 'allow';
+
     public const DENY = 'deny';
+
     public const MONITOR = 'monitor';
+
     public const ESCALATE = 'escalate';
 
     public function __construct(

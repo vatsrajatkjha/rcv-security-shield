@@ -2,10 +2,10 @@
 
 namespace VendorShield\Shield\Tests\Unit\Guards;
 
-use VendorShield\Shield\Tests\TestCase;
+use Illuminate\Database\Events\QueryExecuted;
 use VendorShield\Shield\Guards\DatabaseGuard;
 use VendorShield\Shield\Support\Severity;
-use Illuminate\Database\Events\QueryExecuted;
+use VendorShield\Shield\Tests\TestCase;
 
 class DatabaseGuardTest extends TestCase
 {
@@ -38,7 +38,7 @@ class DatabaseGuardTest extends TestCase
     public function test_union_injection_is_detected(): void
     {
         $query = new QueryExecuted(
-            "SELECT * FROM users WHERE id = 1 UNION SELECT * FROM passwords",
+            'SELECT * FROM users WHERE id = 1 UNION SELECT * FROM passwords',
             [],
             1.0,
             $this->app['db']->connection(),
@@ -52,7 +52,7 @@ class DatabaseGuardTest extends TestCase
     public function test_drop_table_is_detected(): void
     {
         $query = new QueryExecuted(
-            "DROP TABLE users",
+            'DROP TABLE users',
             [],
             1.0,
             $this->app['db']->connection(),
@@ -65,7 +65,7 @@ class DatabaseGuardTest extends TestCase
     public function test_sleep_injection_is_detected(): void
     {
         $query = new QueryExecuted(
-            "SELECT * FROM users WHERE id = 1 AND SLEEP(5)",
+            'SELECT * FROM users WHERE id = 1 AND SLEEP(5)',
             [],
             1.0,
             $this->app['db']->connection(),

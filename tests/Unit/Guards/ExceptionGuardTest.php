@@ -2,16 +2,17 @@
 
 namespace VendorShield\Shield\Tests\Unit\Guards;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\Guards\ExceptionGuard;
-use VendorShield\Shield\Config\ConfigResolver;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Request;
 use RuntimeException;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Guards\ExceptionGuard;
+use VendorShield\Shield\Tests\TestCase;
 
 class ExceptionGuardTest extends TestCase
 {
     protected ExceptionGuard $guard;
+
     protected ExceptionHandler $innerHandler;
 
     protected function setUp(): void

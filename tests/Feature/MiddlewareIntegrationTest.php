@@ -2,19 +2,20 @@
 
 namespace VendorShield\Shield\Tests\Feature;
 
-use Illuminate\Http\UploadedFile;
-use VendorShield\Shield\Tests\TestCase;
 use Illuminate\Http\Request;
-use VendorShield\Shield\Contracts\AuditDriverContract;
+use Illuminate\Http\UploadedFile;
 use VendorShield\Shield\Audit\AuditEntry;
 use VendorShield\Shield\Audit\AuditLogger;
+use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Http\Middleware\ShieldMiddleware;
+use VendorShield\Shield\Tests\TestCase;
 
 class MiddlewareIntegrationTest extends TestCase
 {
     protected function defineRoutes($router): void
     {
-        $router->middleware(\VendorShield\Shield\Http\Middleware\ShieldMiddleware::class)
+        $router->middleware(ShieldMiddleware::class)
             ->group(function ($router) {
                 $router->get('/shield-test', function () {
                     return response()->json(['status' => 'ok']);
@@ -176,7 +177,8 @@ class MiddlewareIntegrationTest extends TestCase
     public function test_audit_driver_exception_does_not_break_request(): void
     {
         $this->app->bind(AuditDriverContract::class, function () {
-            return new class implements AuditDriverContract {
+            return new class implements AuditDriverContract
+            {
                 public function log(AuditEntry $entry): void
                 {
                     throw new \RuntimeException('audit failed');

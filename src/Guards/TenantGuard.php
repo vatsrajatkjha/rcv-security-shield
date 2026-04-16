@@ -2,14 +2,14 @@
 
 namespace VendorShield\Shield\Guards;
 
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
+use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Events\ThreatDetected;
+use VendorShield\Shield\Support\FailSafe;
 use VendorShield\Shield\Support\GuardResult;
 use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Events\ThreatDetected;
-use VendorShield\Shield\Events\GuardTriggered;
-use VendorShield\Shield\Support\FailSafe;
 
 class TenantGuard implements GuardContract
 {
@@ -36,7 +36,7 @@ class TenantGuard implements GuardContract
     /**
      * Validate tenant context and enforce boundaries.
      *
-     * @param mixed $context Array with keys: tenant_id, resource_tenant_id, action, resource
+     * @param  mixed  $context  Array with keys: tenant_id, resource_tenant_id, action, resource
      */
     public function handle(mixed $context): GuardResult
     {
@@ -60,6 +60,7 @@ class TenantGuard implements GuardContract
                 );
 
                 $this->handleResult($result);
+
                 return $result;
             }
 
@@ -81,6 +82,7 @@ class TenantGuard implements GuardContract
             );
 
             $this->handleResult($result);
+
             return $result;
         }
 

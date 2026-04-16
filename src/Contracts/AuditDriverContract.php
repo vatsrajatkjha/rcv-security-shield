@@ -14,7 +14,7 @@ interface AuditDriverContract
     /**
      * Query audit entries with filters.
      *
-     * @param array<string, mixed> $filters
+     * @param  array<string, mixed>  $filters
      * @return array<int, AuditEntry>
      */
     public function query(array $filters = []): array;

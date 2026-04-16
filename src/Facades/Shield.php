@@ -3,6 +3,7 @@
 namespace VendorShield\Shield\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use VendorShield\Shield\ShieldManager;
 
 /**
  * @method static bool enabled()
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \VendorShield\Shield\Config\ConfigResolver config()
  * @method static array health()
  *
- * @see \VendorShield\Shield\ShieldManager
+ * @see ShieldManager
  */
 class Shield extends Facade
 {

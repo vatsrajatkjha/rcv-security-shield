@@ -2,13 +2,13 @@
 
 namespace VendorShield\Shield\Guards;
 
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
-use VendorShield\Shield\Support\GuardResult;
-use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Events\GuardTriggered;
 use VendorShield\Shield\Support\FailSafe;
+use VendorShield\Shield\Support\GuardResult;
+use VendorShield\Shield\Support\Severity;
 
 class CacheGuard implements GuardContract
 {
@@ -35,7 +35,7 @@ class CacheGuard implements GuardContract
     /**
      * Analyze cache operations.
      *
-     * @param mixed $context Array with keys: operation, key, value, ttl
+     * @param  mixed  $context  Array with keys: operation, key, value, ttl
      */
     public function handle(mixed $context): GuardResult
     {
@@ -60,6 +60,7 @@ class CacheGuard implements GuardContract
             if (! $result->passed) {
                 FailSafe::dispatch(fn () => $this->audit->guardEvent($this->name(), 'cache_threat', $result));
                 FailSafe::dispatch(fn () => event(new GuardTriggered($this->name(), $result)));
+
                 return $result;
             }
         }
@@ -69,6 +70,7 @@ class CacheGuard implements GuardContract
             $result = $this->checkSizeAnomaly($key, $value);
             if (! $result->passed) {
                 FailSafe::dispatch(fn () => $this->audit->guardEvent($this->name(), 'cache_size_anomaly', $result));
+
                 return $result;
             }
         }

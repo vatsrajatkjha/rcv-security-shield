@@ -9,8 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Events\AnalysisCompleted;
-use VendorShield\Shield\Support\Severity;
 use VendorShield\Shield\Support\FailSafe;
+use VendorShield\Shield\Support\Severity;
 
 class ShieldAnalysisJob implements ShouldQueue
 {
@@ -128,7 +128,7 @@ class ShieldAnalysisJob implements ShouldQueue
         }
 
         // Deep Archive Inspection (Zip Slip / Archive Bomb)
-        if (!empty($path) && file_exists($path) && preg_match('/\.(zip|tar|gz|bz2|rar)$/i', $filename)) {
+        if (! empty($path) && file_exists($path) && preg_match('/\.(zip|tar|gz|bz2|rar)$/i', $filename)) {
             $archiveFindings = $this->inspectArchive($path);
             $findings = array_merge($findings, $archiveFindings);
         }
@@ -152,11 +152,11 @@ class ShieldAnalysisJob implements ShouldQueue
     {
         $findings = [];
 
-        if (!class_exists('ZipArchive')) {
+        if (! class_exists('ZipArchive')) {
             return $findings;
         }
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($path) === true) {
             $numFiles = $zip->numFiles;
 
@@ -170,7 +170,7 @@ class ShieldAnalysisJob implements ShouldQueue
 
             for ($i = 0; $i < $numFiles; $i++) {
                 $stat = $zip->statIndex($i);
-                if (!$stat) {
+                if (! $stat) {
                     continue;
                 }
 
@@ -190,11 +190,11 @@ class ShieldAnalysisJob implements ShouldQueue
                     $ratio = $stat['size'] / $stat['comp_size'];
                     // If a file decompresses to 1000x its compressed size, it's highly suspicious
                     if ($ratio > 1000 && $stat['size'] > 104857600) { // >100MB uncompressed
-                         $findings[] = [
-                             'type' => 'archive_bomb',
-                             'detail' => "Archive contains highly compressed bomb logic: {$name}",
-                         ];
-                         break;
+                        $findings[] = [
+                            'type' => 'archive_bomb',
+                            'detail' => "Archive contains highly compressed bomb logic: {$name}",
+                        ];
+                        break;
                     }
                 }
             }

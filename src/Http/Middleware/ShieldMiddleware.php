@@ -5,13 +5,14 @@ namespace VendorShield\Shield\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\TenantResolverContract;
 use VendorShield\Shield\Guards\HttpGuard;
 use VendorShield\Shield\Guards\UploadGuard;
 use VendorShield\Shield\Tenant\TenantContext;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Contracts\TenantResolverContract;
 
 class ShieldMiddleware
 {
@@ -66,7 +67,7 @@ class ShieldMiddleware
         } catch (\Throwable $e) {
             // Fail-open: log the error but never block the request
             try {
-                \Illuminate\Support\Facades\Log::warning('Shield middleware error (fail-open)', [
+                Log::warning('Shield middleware error (fail-open)', [
                     'exception' => $e->getMessage(),
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
@@ -97,7 +98,7 @@ class ShieldMiddleware
     }
 
     /**
-     * @param array<mixed> $files
+     * @param  array<mixed>  $files
      * @return array<int, UploadedFile>
      */
     protected function extractFiles(array $files): array
@@ -107,6 +108,7 @@ class ShieldMiddleware
         foreach ($files as $file) {
             if ($file instanceof UploadedFile) {
                 $flattened[] = $file;
+
                 continue;
             }
 
@@ -148,6 +150,6 @@ class ShieldMiddleware
             ?? $request->ip()
             ?? 'unknown';
 
-        return 'shield:upload:' . sha1($actor . '|' . $request->path());
+        return 'shield:upload:'.sha1($actor.'|'.$request->path());
     }
 }

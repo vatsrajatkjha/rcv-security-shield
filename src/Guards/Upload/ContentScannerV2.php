@@ -92,7 +92,7 @@ class ContentScannerV2
 
     public function __construct(?RecursiveDecoder $decoder = null)
     {
-        $this->decoder = $decoder ?? new RecursiveDecoder();
+        $this->decoder = $decoder ?? new RecursiveDecoder;
     }
 
     /**
@@ -101,10 +101,8 @@ class ContentScannerV2
      * Reads the file in chunks and applies recursive decoding
      * before pattern matching. Scans the entire file, not just the header.
      *
-     * @param string $filePath     Path to the uploaded file.
-     * @param int    $maxScanBytes Maximum bytes to scan (0 = entire file).
-     *
-     * @return ContentScanResult
+     * @param  string  $filePath  Path to the uploaded file.
+     * @param  int  $maxScanBytes  Maximum bytes to scan (0 = entire file).
      */
     public function scan(string $filePath, int $maxScanBytes = 0): ContentScanResult
     {
@@ -191,6 +189,7 @@ class ContentScannerV2
                 'detail' => "Dangerous pattern in raw content at offset ~{$offset}",
                 'pattern' => $rawMatch,
             ];
+
             return $findings;
         }
 
@@ -205,6 +204,7 @@ class ContentScannerV2
                     'pattern' => $decodedMatch,
                     'encoding_detected' => true,
                 ];
+
                 return $findings;
             }
         }

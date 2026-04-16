@@ -46,7 +46,7 @@ class ArchiveInspector
             ];
         }
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $opened = $zip->open($path);
 
         if ($opened !== true) {

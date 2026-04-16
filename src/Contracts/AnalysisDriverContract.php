@@ -9,7 +9,7 @@ interface AnalysisDriverContract
     /**
      * Perform deep analysis on the given payload.
      *
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     public function analyze(array $payload): AnalysisResult;
 

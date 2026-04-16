@@ -2,15 +2,15 @@
 
 namespace VendorShield\Shield\Guards;
 
+use Illuminate\Support\Facades\Cache;
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
+use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Events\ThreatDetected;
+use VendorShield\Shield\Support\FailSafe;
 use VendorShield\Shield\Support\GuardResult;
 use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Events\ThreatDetected;
-use VendorShield\Shield\Events\GuardTriggered;
-use Illuminate\Support\Facades\Cache;
-use VendorShield\Shield\Support\FailSafe;
 
 class AuthGuard implements GuardContract
 {
@@ -37,7 +37,7 @@ class AuthGuard implements GuardContract
     /**
      * Analyze authentication context for anomalies.
      *
-     * @param mixed $context Array with keys: ip, email, user_agent, event_type
+     * @param  mixed  $context  Array with keys: ip, email, user_agent, event_type
      */
     public function handle(mixed $context): GuardResult
     {
@@ -95,6 +95,7 @@ class AuthGuard implements GuardContract
             );
 
             $this->handleResult($result);
+
             return $result;
         }
 
@@ -139,6 +140,7 @@ class AuthGuard implements GuardContract
                 );
 
                 $this->handleResult($result);
+
                 return $result;
             }
         }
@@ -163,6 +165,7 @@ class AuthGuard implements GuardContract
 
         if ($storedAgent === null) {
             Cache::put($cacheKey, $userAgent, 86400);
+
             return GuardResult::pass($this->name());
         }
 
@@ -172,13 +175,14 @@ class AuthGuard implements GuardContract
                 message: 'Session anomaly — User-Agent changed during session',
                 severity: Severity::High,
                 metadata: [
-                    'session_id' => substr($sessionId, 0, 8) . '...',
+                    'session_id' => substr($sessionId, 0, 8).'...',
                     'expected_agent' => substr($storedAgent, 0, 50),
                     'actual_agent' => substr($userAgent, 0, 50),
                 ],
             );
 
             $this->handleResult($result);
+
             return $result;
         }
 

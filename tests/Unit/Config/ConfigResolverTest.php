@@ -2,8 +2,8 @@
 
 namespace VendorShield\Shield\Tests\Unit\Config;
 
-use VendorShield\Shield\Tests\TestCase;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Tests\TestCase;
 
 class ConfigResolverTest extends TestCase
 {

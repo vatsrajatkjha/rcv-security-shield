@@ -29,7 +29,7 @@ class StreamProcessor
      * returns it directly. For stream-based uploads (Octane/Swoole),
      * creates a temporary copy.
      *
-     * @param UploadedFile $file The uploaded file.
+     * @param  UploadedFile  $file  The uploaded file.
      * @return string|null Path to a scannable file, or null on failure.
      */
     public function getScanPath(UploadedFile $file): ?string
@@ -59,6 +59,7 @@ class StreamProcessor
             $stream = fopen($file->getPathname(), 'rb');
             if ($stream === false) {
                 unlink($tempPath);
+
                 return null;
             }
 
@@ -66,6 +67,7 @@ class StreamProcessor
             if ($target === false) {
                 fclose($stream);
                 unlink($tempPath);
+
                 return null;
             }
 
@@ -78,6 +80,7 @@ class StreamProcessor
             return $tempPath;
         } catch (\Throwable) {
             @unlink($tempPath);
+
             return null;
         }
     }
@@ -104,6 +107,7 @@ class StreamProcessor
     public function getFileSize(string $filePath): int
     {
         $size = @filesize($filePath);
+
         return $size !== false ? $size : 0;
     }
 

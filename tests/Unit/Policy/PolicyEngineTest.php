@@ -2,11 +2,10 @@
 
 namespace VendorShield\Shield\Tests\Unit\Policy;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Policy\PolicyDecision;
+use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Policy\PolicyLoader;
-use VendorShield\Shield\Policy\ConfigPolicy;
+use VendorShield\Shield\Tests\TestCase;
 
 class PolicyEngineTest extends TestCase
 {

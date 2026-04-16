@@ -2,7 +2,6 @@
 
 namespace VendorShield\Shield\Contracts;
 
-use Illuminate\Support\Collection;
 use VendorShield\Shield\Policy\PolicyDecision;
 
 interface PolicyContract

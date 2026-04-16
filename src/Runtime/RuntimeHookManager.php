@@ -2,17 +2,16 @@
 
 namespace VendorShield\Shield\Runtime;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\DB;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Guards\DatabaseGuard;
-use VendorShield\Shield\Guards\QueueGuard;
 use VendorShield\Shield\Guards\ExceptionGuard;
-use VendorShield\Shield\Guards\HttpGuard;
+use VendorShield\Shield\Guards\QueueGuard;
 use VendorShield\Shield\Http\Middleware\ShieldMiddleware;
 
 class RuntimeHookManager
@@ -140,7 +139,7 @@ class RuntimeHookManager
 
         // Decorate the exception handler — contracts-only approach
         $this->app->extend(
-            \Illuminate\Contracts\Debug\ExceptionHandler::class,
+            ExceptionHandler::class,
             function ($handler, $app) {
                 return new ExceptionGuard($handler, $app->make(ConfigResolver::class), $app);
             }

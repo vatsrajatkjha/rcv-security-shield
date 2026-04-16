@@ -145,7 +145,7 @@ class FilenameCanonicalizer
     /**
      * Generate a cryptographically random storage filename.
      *
-     * @param string $extension The allowed extension to use.
+     * @param  string  $extension  The allowed extension to use.
      * @return string Random filename like "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4.jpg"
      */
     public function generateStorageFilename(string $extension): string

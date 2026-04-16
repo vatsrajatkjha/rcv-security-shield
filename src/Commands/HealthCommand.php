@@ -3,10 +3,10 @@
 namespace VendorShield\Shield\Commands;
 
 use Illuminate\Console\Command;
-use VendorShield\Shield\ShieldManager;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Runtime\RuntimeHookManager;
+use VendorShield\Shield\ShieldManager;
 
 class HealthCommand extends Command
 {
@@ -34,7 +34,7 @@ class HealthCommand extends Command
         // Guard statuses
         $health = $manager->health();
         foreach ($health['guards'] as $name => $status) {
-            $label = ucfirst($name) . ' Guard';
+            $label = ucfirst($name).' Guard';
             $this->components->twoColumnDetail(
                 $label,
                 $status['enabled']
@@ -58,8 +58,8 @@ class HealthCommand extends Command
         }
 
         // Storage directories
-        $quarantine = storage_path('app/' . config('shield.guards.upload.quarantine_path', 'shield/quarantine'));
-        $scanned = storage_path('app/' . config('shield.guards.upload.scanned_path', 'shield/scanned'));
+        $quarantine = storage_path('app/'.config('shield.guards.upload.quarantine_path', 'shield/quarantine'));
+        $scanned = storage_path('app/'.config('shield.guards.upload.scanned_path', 'shield/scanned'));
         $this->outputStatus('Quarantine Directory', is_dir($quarantine) && is_writable($quarantine));
         $this->outputStatus('Scanned Directory', is_dir($scanned) && is_writable($scanned));
 

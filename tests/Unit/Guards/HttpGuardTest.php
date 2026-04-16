@@ -2,13 +2,10 @@
 
 namespace VendorShield\Shield\Tests\Unit\Guards;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\Guards\HttpGuard;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Audit\NullAuditDriver;
-use VendorShield\Shield\Support\Severity;
 use Illuminate\Http\Request;
+use VendorShield\Shield\Guards\HttpGuard;
+use VendorShield\Shield\Support\Severity;
+use VendorShield\Shield\Tests\TestCase;
 
 class HttpGuardTest extends TestCase
 {

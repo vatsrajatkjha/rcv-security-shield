@@ -3,15 +3,15 @@
 namespace VendorShield\Shield\Guards;
 
 use Illuminate\Http\Request;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Contracts\GuardContract;
-use VendorShield\Shield\Support\GuardResult;
-use VendorShield\Shield\Support\Severity;
 use VendorShield\Shield\Async\ShieldAnalysisJob;
 use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Events\ThreatDetected;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\GuardContract;
 use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Events\ThreatDetected;
 use VendorShield\Shield\Support\FailSafe;
+use VendorShield\Shield\Support\GuardResult;
+use VendorShield\Shield\Support\Severity;
 
 class HttpGuard implements GuardContract
 {
@@ -60,6 +60,7 @@ class HttpGuard implements GuardContract
         if (! $result->passed && $this->mode() === 'enforce') {
             FailSafe::dispatch(fn () => event(new ThreatDetected($this->name(), $result)));
             FailSafe::dispatch(fn () => $this->audit->guardEvent($this->name(), 'threat_blocked', $result));
+
             return $result;
         }
 

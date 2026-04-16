@@ -2,10 +2,10 @@
 
 namespace VendorShield\Shield\Policy;
 
-use VendorShield\Shield\Contracts\PolicyLoaderContract;
-use VendorShield\Shield\Config\ConfigResolver;
-use Illuminate\Support\Collection;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Support\Collection;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\PolicyLoaderContract;
 
 class PolicyLoader implements PolicyLoaderContract
 {
@@ -32,6 +32,7 @@ class PolicyLoader implements PolicyLoaderContract
             $data = $this->cache->get($cacheKey);
             if ($data !== null) {
                 $this->cached = $this->hydratePolicies($data);
+
                 return $this->cached;
             }
         }
@@ -49,6 +50,7 @@ class PolicyLoader implements PolicyLoaderContract
         }
 
         $this->cached = $policies;
+
         return $policies;
     }
 

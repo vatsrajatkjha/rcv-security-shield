@@ -2,9 +2,9 @@
 
 namespace VendorShield\Shield\Policy;
 
-use VendorShield\Shield\Contracts\PolicyLoaderContract;
-use VendorShield\Shield\Config\ConfigResolver;
 use Illuminate\Support\Collection;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\PolicyLoaderContract;
 
 class PolicyEngine
 {

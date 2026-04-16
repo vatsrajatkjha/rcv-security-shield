@@ -2,12 +2,12 @@
 
 namespace VendorShield\Shield\Tests\Unit\Guards;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\Guards\AuthGuard;
-use VendorShield\Shield\Config\ConfigResolver;
+use Illuminate\Support\Facades\Cache;
 use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Audit\NullAuditDriver;
-use Illuminate\Support\Facades\Cache;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Guards\AuthGuard;
+use VendorShield\Shield\Tests\TestCase;
 
 class AuthGuardTest extends TestCase
 {
@@ -23,7 +23,7 @@ class AuthGuardTest extends TestCase
         $this->app['config']->set('shield.guards.auth.brute_force_window', 300);
 
         $config = $this->app->make(ConfigResolver::class);
-        $audit = new AuditLogger(new NullAuditDriver(), $config);
+        $audit = new AuditLogger(new NullAuditDriver, $config);
         $this->guard = new AuthGuard($config, $audit);
 
         Cache::flush();

@@ -25,14 +25,14 @@ class InstallCommand extends Command
         // 2. Run migrations
         if ($this->components->confirm('Run Shield database migrations?', true)) {
             $this->call('migrate', [
-                '--path' => realpath(__DIR__ . '/../../database/migrations') ?: __DIR__ . '/../../database/migrations',
+                '--path' => realpath(__DIR__.'/../../database/migrations') ?: __DIR__.'/../../database/migrations',
                 '--realpath' => true,
             ]);
         }
 
         // 3. Create storage directories
-        $quarantinePath = storage_path('app/' . config('shield.guards.upload.quarantine_path', 'shield/quarantine'));
-        $scannedPath = storage_path('app/' . config('shield.guards.upload.scanned_path', 'shield/scanned'));
+        $quarantinePath = storage_path('app/'.config('shield.guards.upload.quarantine_path', 'shield/quarantine'));
+        $scannedPath = storage_path('app/'.config('shield.guards.upload.scanned_path', 'shield/scanned'));
 
         foreach ([$quarantinePath, $scannedPath] as $path) {
             if (! is_dir($path) && FailSafe::ensureDirectory($path)) {
@@ -41,7 +41,7 @@ class InstallCommand extends Command
         }
 
         // 4. Add .gitignore to quarantine
-        $gitignore = $quarantinePath . '/.gitignore';
+        $gitignore = $quarantinePath.'/.gitignore';
         if (! file_exists($gitignore)) {
             FailSafe::writeFile($gitignore, "*\n!.gitignore\n");
         }

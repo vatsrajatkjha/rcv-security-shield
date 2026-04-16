@@ -17,41 +17,41 @@ class MagicByteValidator
      */
     protected const SIGNATURES = [
         // Images
-        'image/jpeg'  => [[0, "\xFF\xD8\xFF"]],
-        'image/png'   => [[0, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"]],
-        'image/gif'   => [[0, "GIF87a"], [0, "GIF89a"]],
-        'image/webp'  => [[0, "RIFF"]], // + "WEBP" at offset 8
-        'image/bmp'   => [[0, "BM"]],
-        'image/tiff'  => [[0, "II\x2A\x00"], [0, "MM\x00\x2A"]],
+        'image/jpeg' => [[0, "\xFF\xD8\xFF"]],
+        'image/png' => [[0, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"]],
+        'image/gif' => [[0, 'GIF87a'], [0, 'GIF89a']],
+        'image/webp' => [[0, 'RIFF']], // + "WEBP" at offset 8
+        'image/bmp' => [[0, 'BM']],
+        'image/tiff' => [[0, "II\x2A\x00"], [0, "MM\x00\x2A"]],
         'image/x-icon' => [[0, "\x00\x00\x01\x00"]],
         'image/svg+xml' => [], // Text-based, validated by content scanner
 
         // Documents
-        'application/pdf' => [[0, "%PDF"]],
+        'application/pdf' => [[0, '%PDF']],
 
         // Archives (also covers DOCX, XLSX, PPTX which use ZIP container)
         'application/zip' => [[0, "PK\x03\x04"], [0, "PK\x05\x06"]],
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => [[0, "PK\x03\x04"]],
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'       => [[0, "PK\x03\x04"]],
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => [[0, "PK\x03\x04"]],
         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => [[0, "PK\x03\x04"]],
 
         // Legacy Office (OLE2 Compound Binary)
-        'application/msword'       => [[0, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"]],
+        'application/msword' => [[0, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"]],
         'application/vnd.ms-excel' => [[0, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"]],
 
         // Audio
-        'audio/mpeg' => [[0, "\xFF\xFB"], [0, "\xFF\xF3"], [0, "\xFF\xF2"], [0, "ID3"]],
-        'audio/wav'  => [[0, "RIFF"]], // + "WAVE" at offset 8
-        'audio/ogg'  => [[0, "OggS"]],
+        'audio/mpeg' => [[0, "\xFF\xFB"], [0, "\xFF\xF3"], [0, "\xFF\xF2"], [0, 'ID3']],
+        'audio/wav' => [[0, 'RIFF']], // + "WAVE" at offset 8
+        'audio/ogg' => [[0, 'OggS']],
 
         // Video
-        'video/mp4'  => [[4, "ftyp"]], // Offset 4 for MP4 ftyp atom
+        'video/mp4' => [[4, 'ftyp']], // Offset 4 for MP4 ftyp atom
         'video/webm' => [[0, "\x1A\x45\xDF\xA3"]],
-        'video/avi'  => [[0, "RIFF"]], // + "AVI " at offset 8
+        'video/avi' => [[0, 'RIFF']], // + "AVI " at offset 8
 
         // Text (no magic bytes — validated by content scanner)
         'text/plain' => [],
-        'text/csv'   => [],
+        'text/csv' => [],
     ];
 
     /**
@@ -65,11 +65,9 @@ class MagicByteValidator
     /**
      * Validate file magic bytes against its declared or detected MIME type.
      *
-     * @param string $filePath    Path to the uploaded file.
-     * @param string $declaredMime The MIME type as declared by the client or detected by finfo.
-     * @param bool   $failClosed  If true, reject files with no known signature.
-     *
-     * @return MagicByteResult
+     * @param  string  $filePath  Path to the uploaded file.
+     * @param  string  $declaredMime  The MIME type as declared by the client or detected by finfo.
+     * @param  bool  $failClosed  If true, reject files with no known signature.
      */
     public function validate(string $filePath, string $declaredMime, bool $failClosed = true): MagicByteResult
     {

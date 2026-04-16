@@ -14,8 +14,8 @@ class SafeStoragePolicy
     /**
      * Validate that a storage path is outside the web root.
      *
-     * @param string $storagePath The configured storage path.
-     * @param string $publicPath  The application's public directory.
+     * @param  string  $storagePath  The configured storage path.
+     * @param  string  $publicPath  The application's public directory.
      */
     public function isStoragePathSafe(string $storagePath, string $publicPath): bool
     {
@@ -29,7 +29,7 @@ class SafeStoragePolicy
             if ($parentStorage === false) {
                 return true; // Can't determine, caller must handle
             }
-            $realStorage = $parentStorage . DIRECTORY_SEPARATOR . basename($storagePath);
+            $realStorage = $parentStorage.DIRECTORY_SEPARATOR.basename($storagePath);
         }
 
         // Storage must NOT be under public path
@@ -44,7 +44,7 @@ class SafeStoragePolicy
      *
      * Example: hash "a1b2c3d4..." → "a1/b2/a1b2c3d4..."
      *
-     * @param string $fileHash SHA-256 hash of the file.
+     * @param  string  $fileHash  SHA-256 hash of the file.
      * @return string Relative path with directory sharding.
      */
     public function generateShardedPath(string $fileHash): string
@@ -52,15 +52,15 @@ class SafeStoragePolicy
         $shard1 = substr($fileHash, 0, 2);
         $shard2 = substr($fileHash, 2, 2);
 
-        return $shard1 . DIRECTORY_SEPARATOR . $shard2;
+        return $shard1.DIRECTORY_SEPARATOR.$shard2;
     }
 
     /**
      * Build the complete safe storage path for a file.
      *
-     * @param string $basePath     The configured storage base path.
-     * @param string $fileHash     SHA-256 hash of the file.
-     * @param string $safeFilename The randomized filename (from FilenameCanonicalizer).
+     * @param  string  $basePath  The configured storage base path.
+     * @param  string  $fileHash  SHA-256 hash of the file.
+     * @param  string  $safeFilename  The randomized filename (from FilenameCanonicalizer).
      * @return string Complete storage path.
      */
     public function buildStoragePath(string $basePath, string $fileHash, string $safeFilename): string
@@ -68,16 +68,16 @@ class SafeStoragePolicy
         $shardedDir = $this->generateShardedPath($fileHash);
 
         return rtrim($basePath, DIRECTORY_SEPARATOR)
-            . DIRECTORY_SEPARATOR
-            . $shardedDir
-            . DIRECTORY_SEPARATOR
-            . $safeFilename;
+            .DIRECTORY_SEPARATOR
+            .$shardedDir
+            .DIRECTORY_SEPARATOR
+            .$safeFilename;
     }
 
     /**
      * Enforce read-only permissions on a stored file.
      *
-     * @param string $filePath Path to the stored file.
+     * @param  string  $filePath  Path to the stored file.
      * @return bool True if permissions were set successfully.
      */
     public function enforceReadOnly(string $filePath): bool

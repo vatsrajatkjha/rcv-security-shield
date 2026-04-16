@@ -2,15 +2,15 @@
 
 namespace VendorShield\Shield\Tests\Feature;
 
-use VendorShield\Shield\Tests\TestCase;
-use VendorShield\Shield\ShieldManager;
-use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Contracts\IntelligenceClientContract;
-use VendorShield\Shield\Contracts\AuditDriverContract;
-use VendorShield\Shield\Policy\PolicyEngine;
-use VendorShield\Shield\Tenant\TenantContext;
 use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Audit\NullAuditDriver;
+use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Contracts\AuditDriverContract;
+use VendorShield\Shield\Contracts\IntelligenceClientContract;
+use VendorShield\Shield\Policy\PolicyEngine;
+use VendorShield\Shield\ShieldManager;
+use VendorShield\Shield\Tenant\TenantContext;
+use VendorShield\Shield\Tests\TestCase;
 
 class ServiceProviderTest extends TestCase
 {

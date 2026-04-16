@@ -4,23 +4,23 @@ namespace VendorShield\Shield\Guards;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use VendorShield\Shield\Async\ShieldAnalysisJob;
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
-use VendorShield\Shield\Support\GuardResult;
-use VendorShield\Shield\Support\Severity;
-use VendorShield\Shield\Audit\AuditLogger;
-use VendorShield\Shield\Async\ShieldAnalysisJob;
-use VendorShield\Shield\Events\ThreatDetected;
 use VendorShield\Shield\Events\GuardTriggered;
+use VendorShield\Shield\Events\ThreatDetected;
+use VendorShield\Shield\Guards\Upload\ArchiveInspector;
+use VendorShield\Shield\Guards\Upload\ContentScannerV2;
 use VendorShield\Shield\Guards\Upload\FilenameCanonicalizer;
-use VendorShield\Shield\Guards\Upload\RecursiveDecoder;
 use VendorShield\Shield\Guards\Upload\MagicByteValidator;
 use VendorShield\Shield\Guards\Upload\PolyglotDetector;
-use VendorShield\Shield\Guards\Upload\ContentScannerV2;
+use VendorShield\Shield\Guards\Upload\RecursiveDecoder;
 use VendorShield\Shield\Guards\Upload\SafeStoragePolicy;
 use VendorShield\Shield\Guards\Upload\StreamProcessor;
-use VendorShield\Shield\Guards\Upload\ArchiveInspector;
 use VendorShield\Shield\Support\FailSafe;
+use VendorShield\Shield\Support\GuardResult;
+use VendorShield\Shield\Support\Severity;
 
 class UploadGuard implements GuardContract
 {
@@ -137,7 +137,7 @@ class UploadGuard implements GuardContract
     /**
      * Validate a batch of uploaded files.
      *
-     * @param array<UploadedFile> $files
+     * @param  array<UploadedFile>  $files
      * @return array<GuardResult>
      */
     public function handleBatch(array $files): array
@@ -162,6 +162,7 @@ class UploadGuard implements GuardContract
                     ['filename' => $file->getClientOriginalName()],
                 );
             }
+
             return GuardResult::pass($this->name());
         }
 
@@ -189,6 +190,7 @@ class UploadGuard implements GuardContract
             $result = $check();
             if (! $result->passed) {
                 $this->handleResult($result, $file);
+
                 return ($this->mode() === 'enforce') ? $result : GuardResult::monitor(
                     guard: $this->name(),
                     message: $result->message,
@@ -615,7 +617,7 @@ class UploadGuard implements GuardContract
      */
     protected function checkCache(string $fileHash): ?GuardResult
     {
-        $cacheKey = self::CACHE_PREFIX . $fileHash;
+        $cacheKey = self::CACHE_PREFIX.$fileHash;
         $ttl = $this->config->guard('upload', 'scan_cache_ttl', 3600);
 
         try {
@@ -635,7 +637,7 @@ class UploadGuard implements GuardContract
      */
     protected function cacheResult(string $fileHash, bool $clean): void
     {
-        $cacheKey = self::CACHE_PREFIX . $fileHash;
+        $cacheKey = self::CACHE_PREFIX.$fileHash;
         $ttl = $this->config->guard('upload', 'scan_cache_ttl', 3600);
 
         try {

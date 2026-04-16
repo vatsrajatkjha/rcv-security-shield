@@ -7,6 +7,7 @@ use Illuminate\Contracts\Config\Repository;
 class ConfigResolver
 {
     protected ?string $tenantId = null;
+
     protected array $runtimeOverrides = [];
 
     public function __construct(
