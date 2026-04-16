@@ -7,6 +7,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       fail-fast: false
       matrix:
@@ -14,16 +16,16 @@ jobs:
         laravel: ['^11.0', '^12.0']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ matrix.php }}
           coverage: none
           tools: composer:v2
           extensions: mbstring, intl, zip, pdo_sqlite
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           dependency-versions: highest
 
