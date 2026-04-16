@@ -70,7 +70,4 @@ parameters:
 			count: 3
 			path: src/Support/GuardResult.php
 
-		-
-			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#1 \\$key \\(string\\) is implicitly nullable via default value null\\.$#"
-			count: 1
-			path: src/Tenant/TenantContext.php
+
