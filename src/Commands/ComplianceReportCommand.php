@@ -5,7 +5,6 @@ namespace VendorShield\Shield\Commands;
 use Illuminate\Console\Command;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\AuditDriverContract;
-use VendorShield\Shield\Contracts\LicenseManagerContract;
 use VendorShield\Shield\Support\FailSafe;
 
 class ComplianceReportCommand extends Command
@@ -21,16 +20,7 @@ class ComplianceReportCommand extends Command
     public function handle(
         ConfigResolver $config,
         AuditDriverContract $auditDriver,
-        LicenseManagerContract $license,
     ): int {
-        // Feature gate: enterprise only
-        if (! $license->check('compliance_reports')) {
-            $this->components->warn('Compliance reports require an Enterprise license.');
-            $this->components->info('Current tier: ' . strtoupper($license->tier()));
-            $this->components->info('Visit https://shield.dev/pricing for upgrade options.');
-            return self::SUCCESS;
-        }
-
         $type = strtoupper($this->option('type'));
         $from = $this->option('from') ?? now()->subDays(30)->format('Y-m-d');
         $to = $this->option('to') ?? now()->format('Y-m-d');

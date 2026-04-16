@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static array guards()
  * @method static \VendorShield\Shield\Policy\PolicyEngine policy()
  * @method static \VendorShield\Shield\Tenant\TenantContext tenant(?string $tenantId = null)
- * @method static \VendorShield\Shield\Contracts\LicenseManagerContract license()
  * @method static \VendorShield\Shield\Contracts\IntelligenceClientContract intelligence()
  * @method static \VendorShield\Shield\Audit\AuditLogger audit()
  * @method static \VendorShield\Shield\Config\ConfigResolver config()

@@ -24,8 +24,6 @@ use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Policy\PolicyLoader;
 use VendorShield\Shield\Tenant\TenantContext;
 use VendorShield\Shield\Tenant\HeaderTenantResolver;
-use VendorShield\Shield\Licensing\LicenseManager;
-use VendorShield\Shield\Licensing\FeatureGate;
 use VendorShield\Shield\Intelligence\IntelligenceClient;
 use VendorShield\Shield\Intelligence\NullIntelligenceClient;
 use VendorShield\Shield\Audit\AuditLogger;
@@ -35,7 +33,6 @@ use VendorShield\Shield\Audit\NullAuditDriver;
 use VendorShield\Shield\Contracts\GuardContract;
 use VendorShield\Shield\Contracts\PolicyLoaderContract;
 use VendorShield\Shield\Contracts\TenantResolverContract;
-use VendorShield\Shield\Contracts\LicenseManagerContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Commands\InstallCommand;
@@ -182,16 +179,6 @@ class ShieldServiceProvider extends ServiceProvider
                 $app->make(ConfigResolver::class),
             );
         });
-
-        // Licensing
-        $this->app->singleton(LicenseManagerContract::class, function ($app) {
-            return new LicenseManager(
-                $app->make(ConfigResolver::class),
-                $app->make(\Illuminate\Contracts\Cache\Repository::class),
-            );
-        });
-
-        $this->app->singleton(FeatureGate::class);
 
         // Intelligence Client
         $this->app->singleton(IntelligenceClientContract::class, function ($app) {

@@ -2,6 +2,12 @@
     "name": "vendor-shield/laravel-shield",
     "description": "Enterprise Runtime Security Platform for Laravel Applications",
     "keywords": ["laravel", "security", "rasp", "runtime-security", "waf", "enterprise"],
+    "authors": [
+        {
+            "name": "Rajat Kumar Jha",
+            "organization": "RCV Technologies"
+        }
+    ],
     "license": "MIT",
     "type": "library",
     "require": {

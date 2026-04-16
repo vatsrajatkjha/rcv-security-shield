@@ -5,7 +5,6 @@ namespace VendorShield\Shield\Tests\Feature;
 use VendorShield\Shield\Tests\TestCase;
 use VendorShield\Shield\ShieldManager;
 use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Contracts\LicenseManagerContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Policy\PolicyEngine;
@@ -45,12 +44,6 @@ class ServiceProviderTest extends TestCase
     {
         $logger = $this->app->make(AuditLogger::class);
         $this->assertInstanceOf(AuditLogger::class, $logger);
-    }
-
-    public function test_license_manager_resolves(): void
-    {
-        $license = $this->app->make(LicenseManagerContract::class);
-        $this->assertInstanceOf(LicenseManagerContract::class, $license);
     }
 
     public function test_intelligence_client_resolves(): void

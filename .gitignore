@@ -24,3 +24,5 @@ Thumbs.db
 .nyc_output/
 .phpunit.result.cache
 tests/test_script.php
+
+PHASED_DEVELOPMENT_PLAN.md

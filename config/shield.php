@@ -239,18 +239,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Licensing
-    |--------------------------------------------------------------------------
-    */
-    'licensing' => [
-        'key' => env('SHIELD_LICENSE_KEY', null),
-        'server' => env('SHIELD_LICENSE_SERVER', 'https://license.shield.dev'),
-        'cache_ttl' => env('SHIELD_LICENSE_CACHE_TTL', 86400), // 24 hours
-        'fail_open' => true, // never block on license failure
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Cloud Intelligence
     |--------------------------------------------------------------------------
     */

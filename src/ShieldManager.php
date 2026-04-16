@@ -4,7 +4,6 @@ namespace VendorShield\Shield;
 
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Contracts\GuardContract;
-use VendorShield\Shield\Contracts\LicenseManagerContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Tenant\TenantContext;
@@ -111,14 +110,6 @@ class ShieldManager
         }
 
         return $context;
-    }
-
-    /**
-     * Access the license manager.
-     */
-    public function license(): LicenseManagerContract
-    {
-        return $this->app->make(LicenseManagerContract::class);
     }
 
     /**

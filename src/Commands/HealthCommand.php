@@ -5,7 +5,6 @@ namespace VendorShield\Shield\Commands;
 use Illuminate\Console\Command;
 use VendorShield\Shield\ShieldManager;
 use VendorShield\Shield\Config\ConfigResolver;
-use VendorShield\Shield\Contracts\LicenseManagerContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Runtime\RuntimeHookManager;
 
@@ -18,7 +17,6 @@ class HealthCommand extends Command
     public function handle(
         ShieldManager $manager,
         ConfigResolver $config,
-        LicenseManagerContract $license,
         IntelligenceClientContract $intelligence,
         RuntimeHookManager $hooks,
     ): int {
@@ -47,10 +45,6 @@ class HealthCommand extends Command
 
         $this->newLine();
         $this->components->info('Subsystem Status');
-
-        // License
-        $this->components->twoColumnDetail('License Tier', strtoupper($license->tier()));
-        $this->outputStatus('License Valid', $license->isValid() || $license->tier() === 'oss');
 
         // Intelligence
         $this->outputStatus('Cloud Intelligence', $intelligence->available());
