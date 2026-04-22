@@ -8,6 +8,8 @@ use VendorShield\Shield\Audit\NullAuditDriver;
 use VendorShield\Shield\Config\ConfigResolver;
 use VendorShield\Shield\Guards\AuthGuard;
 use VendorShield\Shield\Tests\TestCase;
+use VendorShield\Shield\Threat\NullThreatDriver;
+use VendorShield\Shield\Threat\ThreatLogger;
 
 class AuthGuardTest extends TestCase
 {
@@ -23,7 +25,8 @@ class AuthGuardTest extends TestCase
         $this->app['config']->set('shield.guards.auth.brute_force_window', 300);
 
         $config = $this->app->make(ConfigResolver::class);
-        $audit = new AuditLogger(new NullAuditDriver, $config);
+        $threatLogger = new ThreatLogger(new NullThreatDriver, $config);
+        $audit = new AuditLogger(new NullAuditDriver, $config, $threatLogger);
         $this->guard = new AuthGuard($config, $audit);
 
         Cache::flush();
