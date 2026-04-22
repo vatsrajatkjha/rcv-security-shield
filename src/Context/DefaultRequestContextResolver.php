@@ -11,7 +11,7 @@ use VendorShield\Shield\Contracts\RequestContextResolverContract;
 class DefaultRequestContextResolver implements RequestContextResolverContract
 {
     public function __construct(
-        protected AuthFactory $auth
+        protected AuthFactory $auth,
     ) {}
 
     public function resolve(Request $request): array
