@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-22
+
+### Added
+- **Access Control Framework**: Pluggable policy-based access control system
+  - `AccessControlDeciderContract` for custom access decision implementations
+  - `NullAccessControlDecider` default implementation (permissive)
+  - `AccessDecision` value object for blocking decisions with metadata
+  - Integration into `ShieldMiddleware` for enforcing access policies
+  - Blocking with custom HTTP status codes and error messages
+- **Request Context System**: Comprehensive request-scoped context tracking
+  - `RequestContextStore` for managing request lifecycle data
+  - `RequestContextResolverContract` for extensible context resolution
+  - `DefaultRequestContextResolver` that captures:
+    - Request ID (UUID) for request tracing
+    - Timestamp and request metadata
+    - Client IP and forwarded-for chain
+    - Authentication user information
+    - Request scheme, method, and host
+    - Authentication method and capabilities
+  - Scoped binding in service container (cleared per request)
+- Request context integration into audit and threat logging for correlation
+
+### Changed
+- **AuditLogger**: Now includes request context in all audit entries
+  - Unified `contextForGuard()` method for consistent context structure
+  - Enhanced analysis and policy error event logging
+- **ThreatLogger**: Enriched threat entries with request context
+  - Better threat correlation across events
+- **ShieldMiddleware**: Enhanced with access control enforcement
+  - Request context resolution on every request
+  - Access control decision evaluation before HTTP guard
+  - Threat blocking with detailed JSON responses including request reference
+  - Automatic request ID generation for tracing
+- **DatabaseGuard**: Improved handling of DDL operations
+  - Console commands can safely execute CREATE/ALTER/DROP operations
+  - Exemption for migration table operations (INSERT/DELETE)
+  - Better framework automation detection
+- **ServiceProvider**: Registered new access control and context infrastructure
+  - Bindings for request context and resolver contracts
+  - Injected RequestContextStore into AuditLogger and ThreatLogger
+
 ## [1.1.0] - 2026-04-22
 
 ### Added

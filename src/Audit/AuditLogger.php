@@ -4,6 +4,7 @@ namespace VendorShield\Shield\Audit;
 
 use VendorShield\Shield\Async\AnalysisResult;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Context\RequestContextStore;
 use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Support\GuardResult;
 use VendorShield\Shield\Support\Severity;
@@ -15,6 +16,7 @@ class AuditLogger
         protected AuditDriverContract $driver,
         protected ConfigResolver $config,
         protected ThreatLogger $threats,
+        protected RequestContextStore $requestContext,
     ) {}
 
     /**
@@ -41,9 +43,7 @@ class AuditLogger
                 severity: $result->severity,
                 tenantId: $this->config->tenant(),
                 payload: $this->augmentGuardPayload($result, $fingerprint),
-                context: [
-                    'mode' => $this->config->guardMode($guard),
-                ],
+                context: $this->contextForGuard($guard),
             );
 
             try {
@@ -74,6 +74,7 @@ class AuditLogger
                 severity: $result->severity,
                 tenantId: $this->config->tenant(),
                 payload: $this->augmentAnalysisPayload($result, $fingerprint),
+                context: $this->contextForGuard($guard),
             );
 
             try {
@@ -103,6 +104,7 @@ class AuditLogger
             severity: Severity::Medium,
             tenantId: $this->config->tenant(),
             payload: ['error' => $errorMessage],
+            context: $this->contextForGuard($guard),
         );
 
         try {
@@ -127,6 +129,9 @@ class AuditLogger
             severity: $severity,
             tenantId: $this->config->tenant(),
             payload: $payload,
+            context: array_filter([
+                'request_context' => $this->requestContext->all(),
+            ], static fn ($value) => $value !== null && $value !== []),
         );
 
         try {
@@ -180,5 +185,13 @@ class AuditLogger
             'job_failed',
             'analysis_error',
         ], true);
+    }
+
+    protected function contextForGuard(string $guard): array
+    {
+        return array_filter([
+            'mode' => $this->config->guardMode($guard),
+            'request_context' => $this->requestContext->all(),
+        ], static fn ($value) => $value !== null && $value !== []);
     }
 }

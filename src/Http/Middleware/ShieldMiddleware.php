@@ -8,10 +8,16 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
+use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Context\RequestContextStore;
+use VendorShield\Shield\Contracts\AccessControlDeciderContract;
+use VendorShield\Shield\Contracts\RequestContextResolverContract;
 use VendorShield\Shield\Contracts\TenantResolverContract;
 use VendorShield\Shield\Guards\HttpGuard;
 use VendorShield\Shield\Guards\UploadGuard;
+use VendorShield\Shield\Support\GuardResult;
+use VendorShield\Shield\Support\Severity;
 use VendorShield\Shield\Tenant\TenantContext;
 
 class ShieldMiddleware
@@ -21,6 +27,10 @@ class ShieldMiddleware
         protected UploadGuard $uploadGuard,
         protected ConfigResolver $config,
         protected TenantContext $tenantContext,
+        protected AuditLogger $auditLogger,
+        protected RequestContextStore $requestContext,
+        protected RequestContextResolverContract $requestContextResolver,
+        protected AccessControlDeciderContract $accessControlDecider,
         protected ?TenantResolverContract $tenantResolver = null,
     ) {}
 
@@ -34,6 +44,11 @@ class ShieldMiddleware
         try {
             // Resolve tenant context
             $this->resolveTenant($request);
+            $this->requestContext->set($this->requestContextResolver->resolve($request));
+
+            if ($response = $this->enforceAccessDecision($request)) {
+                return $response;
+            }
 
             // HTTP Guard — fast-path validation
             if ($this->httpGuard->enabled()) {
@@ -78,6 +93,35 @@ class ShieldMiddleware
         }
 
         return $next($request);
+    }
+
+    protected function enforceAccessDecision(Request $request): ?Response
+    {
+        $decision = $this->accessControlDecider->decide($request, $this->requestContext->all());
+
+        if ($decision === null || ! $decision->block) {
+            return null;
+        }
+
+        try {
+            $this->auditLogger->guardEvent('http', 'threat_blocked', GuardResult::fail(
+                guard: 'http',
+                message: $decision->message,
+                severity: Severity::Critical,
+                metadata: array_merge($decision->metadata, [
+                    'check' => 'access_control',
+                    'decision_code' => $decision->code,
+                ]),
+            ));
+        } catch (\Throwable) {
+            // Never fail closed because logging failed
+        }
+
+        return response()->json([
+            'error' => 'Request blocked by security policy',
+            'message' => $decision->message,
+            'reference' => $this->requestContext->all()['request_id'] ?? uniqid('shield_'),
+        ], $decision->statusCode);
     }
 
     /**

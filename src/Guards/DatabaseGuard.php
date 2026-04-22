@@ -215,7 +215,13 @@ class DatabaseGuard implements GuardContract
     {
         $sql = strtolower(trim($query->sql));
 
+        if (app()->runningInConsole() && preg_match('/^(create|alter|drop|rename)\s+(table|index)\b/i', $sql)) {
+            return true;
+        }
+
         $ignorePatterns = [
+            '/^insert into [`"]?migrations[`"]?\b/i',
+            '/^delete from [`"]?migrations[`"]?\b/i',
             '/^select exists\s*\(\s*select 1 from information_schema\.(tables|columns|statistics|schemata)\b/i',
             '/^select \* from information_schema\.(tables|columns|statistics|schemata)\b/i',
             '/^show (full )?(tables|columns|indexes|keys)\b/i',

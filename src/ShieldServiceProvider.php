@@ -5,6 +5,7 @@ namespace VendorShield\Shield;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Octane\Events\RequestReceived;
+use VendorShield\Shield\Access\NullAccessControlDecider;
 use VendorShield\Shield\Audit\AuditLogger;
 use VendorShield\Shield\Audit\DatabaseAuditDriver;
 use VendorShield\Shield\Audit\LogAuditDriver;
@@ -15,9 +16,13 @@ use VendorShield\Shield\Commands\HealthCommand;
 use VendorShield\Shield\Commands\InstallCommand;
 use VendorShield\Shield\Commands\RuntimeEnableCommand;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Context\DefaultRequestContextResolver;
+use VendorShield\Shield\Context\RequestContextStore;
+use VendorShield\Shield\Contracts\AccessControlDeciderContract;
 use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Contracts\PolicyLoaderContract;
+use VendorShield\Shield\Contracts\RequestContextResolverContract;
 use VendorShield\Shield\Contracts\TenantResolverContract;
 use VendorShield\Shield\Contracts\ThreatDriverContract;
 use VendorShield\Shield\Guards\AuthGuard;
@@ -76,6 +81,10 @@ class ShieldServiceProvider extends ServiceProvider
             return new TenantContext;
         });
 
+        $this->app->scoped(RequestContextStore::class, function () {
+            return new RequestContextStore;
+        });
+
         // Tenant Resolver
         $this->app->singleton(TenantResolverContract::class, function ($app) {
             $config = $app->make(ConfigResolver::class);
@@ -86,6 +95,14 @@ class ShieldServiceProvider extends ServiceProvider
             }
 
             return new HeaderTenantResolver($config);
+        });
+
+        $this->app->singleton(RequestContextResolverContract::class, function ($app) {
+            return new DefaultRequestContextResolver($app['auth']);
+        });
+
+        $this->app->singleton(AccessControlDeciderContract::class, function () {
+            return new NullAccessControlDecider;
         });
 
         // Audit Driver
@@ -107,6 +124,7 @@ class ShieldServiceProvider extends ServiceProvider
                 $app->make(AuditDriverContract::class),
                 $app->make(ConfigResolver::class),
                 $app->make(ThreatLogger::class),
+                $app->make(RequestContextStore::class),
             );
         });
 
@@ -128,6 +146,7 @@ class ShieldServiceProvider extends ServiceProvider
             return new ThreatLogger(
                 $app->make(ThreatDriverContract::class),
                 $app->make(ConfigResolver::class),
+                $app->make(RequestContextStore::class),
             );
         });
 
@@ -321,6 +340,7 @@ class ShieldServiceProvider extends ServiceProvider
                 function () {
                     $this->app->make(ShieldManager::class)->reset();
                     $this->app->make(TenantContext::class)->clear();
+                    $this->app->make(RequestContextStore::class)->clear();
                 }
             );
         }

@@ -4,6 +4,7 @@ namespace VendorShield\Shield\Threat;
 
 use VendorShield\Shield\Async\AnalysisResult;
 use VendorShield\Shield\Config\ConfigResolver;
+use VendorShield\Shield\Context\RequestContextStore;
 use VendorShield\Shield\Contracts\ThreatDriverContract;
 use VendorShield\Shield\Support\GuardResult;
 
@@ -12,6 +13,7 @@ class ThreatLogger
     public function __construct(
         protected ThreatDriverContract $driver,
         protected ConfigResolver $config,
+        protected RequestContextStore $requestContext,
     ) {}
 
     public function enabled(): bool
@@ -41,6 +43,7 @@ class ThreatLogger
                 'guard' => $result->guard,
                 'passed' => $result->passed,
                 'mode' => $this->config->guardMode($guard),
+                'request_context' => $this->requestContext->all(),
             ],
         );
 
@@ -74,6 +77,7 @@ class ThreatLogger
                 'findings' => $result->findings,
                 'metadata' => $result->metadata,
                 'clean' => $result->clean,
+                'request_context' => $this->requestContext->all(),
             ],
         );
 
