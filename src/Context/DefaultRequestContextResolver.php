@@ -24,7 +24,10 @@ class DefaultRequestContextResolver implements RequestContextResolverContract
             'occurred_at' => now()->toIso8601String(),
             'request' => [
                 'ip_address' => $request->ip(),
-                'forwarded_for' => array_values(array_filter(array_map('trim', explode(',', (string) $request->headers->get('X-Forwarded-For', ''))))),
+                'forwarded_for' => array_values(array_filter(array_map(
+                    'trim',
+                    explode(',', (string) $request->headers->get('X-Forwarded-For', ''))
+                ))),
                 'method' => $request->method(),
                 'scheme' => $request->getScheme(),
                 'host' => $request->getHost(),
@@ -34,7 +37,10 @@ class DefaultRequestContextResolver implements RequestContextResolverContract
                 'user_agent' => Str::limit((string) $request->userAgent(), 1024, ''),
                 'referer' => $request->headers->get('referer'),
                 'session_id' => $request->hasSession() ? $request->session()->getId() : null,
-                'input_keys' => array_values(array_keys(Arr::except($request->all(), ['password', 'password_confirmation', 'current_password', 'token', '_token']))),
+                'input_keys' => array_values(array_keys(Arr::except(
+                    $request->all(),
+                    ['password', 'password_confirmation', 'current_password', 'token', '_token']
+                ))),
                 'file_keys' => array_values(array_keys($request->allFiles())),
             ],
             'actor' => $this->resolveActor(),
