@@ -20,8 +20,27 @@ class HttpGuard implements GuardContract
         'sql_injection' => '/(\bunion\b.*\bselect\b|\binsert\b.*\binto\b|\bdelete\b.*\bfrom\b|\bdrop\b.*\btable\b|\bexec\b|\bexecute\b)/i',
         'xss' => '/<script\b[^>]*>|javascript:|on\w+\s*=/i',
         'path_traversal' => '/\.\.[\/\\\\]/i',
-        'command_injection' => '/[;&|`$]|\b(bash|sh|cmd|powershell)\b/i',
+        'command_injection' => '/(?:\$\(|\$\{[^}]+\}|&&|\|\||`[^`]+`|;\s*(?:bash|sh|cmd|powershell|curl|wget|nc|chmod|rm|mv|cp)\b|(?:^|[\s"\'])\b(?:bash|sh|cmd|powershell)\b(?=[\s"\']|$))/i',
         'null_byte' => '/\x00/',
+    ];
+
+    /**
+     * Fields whose values are commonly free-form profile/business text and
+     * should not be blocked by shell-oriented heuristics unless explicitly
+     * dangerous patterns like XSS/path traversal/null bytes are present.
+     */
+    protected const COMMAND_INJECTION_RELAXED_FIELDS = [
+        'headline',
+        'resume_headline',
+        'summary',
+        'bio',
+        'description',
+        'about',
+        'cover_letter',
+        'notes',
+        'address',
+        'company_name',
+        'organization_name',
     ];
 
     public function __construct(
@@ -161,6 +180,10 @@ class HttpGuard implements GuardContract
             }
 
             foreach (self::SUSPICIOUS_PATTERNS as $type => $pattern) {
+                if ($type === 'command_injection' && $this->shouldRelaxCommandInjectionCheck($key, $value)) {
+                    continue;
+                }
+
                 if (preg_match($pattern, $value)) {
                     return GuardResult::fail(
                         guard: $this->name(),
@@ -177,6 +200,20 @@ class HttpGuard implements GuardContract
         }
 
         return GuardResult::pass($this->name());
+    }
+
+    protected function shouldRelaxCommandInjectionCheck(string $field, string $value): bool
+    {
+        $normalizedField = strtolower($field);
+
+        foreach (self::COMMAND_INJECTION_RELAXED_FIELDS as $candidate) {
+            if (str_contains($normalizedField, $candidate)) {
+                // Still let clearly dangerous shell constructs be caught.
+                return ! preg_match('/(?:\$\(|&&|\|\||`[^`]+`|;\s*(?:bash|sh|cmd|powershell|curl|wget|nc|chmod|rm|mv|cp)\b)/i', $value);
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -4,6 +4,10 @@
 
 Laravel Shield provides in-app runtime protection for Laravel: request inspection, upload hardening, SQL/query monitoring, queue/auth/cache/tenant safeguards, exception intelligence, audit logging, and operational security tooling.
 
+Shield persists two complementary streams:
+- `shield_audit_logs` for immutable audit events
+- `shield_threat_logs` for normalized actionable threat records with stable fingerprints
+
 ---
 
 ## Why Laravel Shield
@@ -155,6 +159,13 @@ Primary file: `config/shield.php`
 
 ```env
 SHIELD_AUDIT_DRIVER=database
+# or: log, null
+```
+
+### Threat driver
+
+```env
+SHIELD_THREATS_DRIVER=database
 # or: log, null
 ```
 

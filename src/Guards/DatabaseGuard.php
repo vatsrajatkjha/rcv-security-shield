@@ -60,6 +60,10 @@ class DatabaseGuard implements GuardContract
             return GuardResult::pass($this->name());
         }
 
+        if ($this->shouldIgnoreQuery($context)) {
+            return GuardResult::pass($this->name());
+        }
+
         $results = [];
 
         // 1. SQL injection detection
@@ -202,6 +206,31 @@ class DatabaseGuard implements GuardContract
     {
         // Simple heuristic: quoted strings in WHERE/SET clauses
         return (bool) preg_match('/\b(WHERE|SET|VALUES)\b.*\'[^\']+\'/i', $sql);
+    }
+
+    /**
+     * Ignore framework/database metadata introspection queries.
+     */
+    protected function shouldIgnoreQuery(QueryExecuted $query): bool
+    {
+        $sql = strtolower(trim($query->sql));
+
+        $ignorePatterns = [
+            '/^select exists\s*\(\s*select 1 from information_schema\.(tables|columns|statistics|schemata)\b/i',
+            '/^select \* from information_schema\.(tables|columns|statistics|schemata)\b/i',
+            '/^show (full )?(tables|columns|indexes|keys)\b/i',
+            '/^describe\b/i',
+            '/^pragma\b/i',
+            '/^select .* from sqlite_master\b/i',
+        ];
+
+        foreach ($ignorePatterns as $pattern) {
+            if (preg_match($pattern, $sql)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

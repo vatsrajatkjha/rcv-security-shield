@@ -24,6 +24,10 @@ class MagicByteValidator
         'image/bmp' => [[0, 'BM']],
         'image/tiff' => [[0, "II\x2A\x00"], [0, "MM\x00\x2A"]],
         'image/x-icon' => [[0, "\x00\x00\x01\x00"]],
+        'image/vnd.microsoft.icon' => [[0, "\x00\x00\x01\x00"]],
+        'image/avif' => [[4, 'ftypavif'], [4, 'ftypavis']],
+        'image/heic' => [[4, 'ftypheic'], [4, 'ftypheix'], [4, 'ftypheim'], [4, 'ftypheis']],
+        'image/heif' => [[4, 'ftypmif1'], [4, 'ftypheif'], [4, 'ftypheic']],
         'image/svg+xml' => [], // Text-based, validated by content scanner
 
         // Documents
@@ -88,6 +92,10 @@ class MagicByteValidator
 
         // Check declared MIME against known signatures
         if (isset(self::SIGNATURES[$declaredMime]) && ! empty(self::SIGNATURES[$declaredMime])) {
+            if ($this->matchesSpecializedContainerFormat($header, $declaredMime)) {
+                return MagicByteResult::pass($declaredMime);
+            }
+
             foreach (self::SIGNATURES[$declaredMime] as [$offset, $signature]) {
                 if (substr($header, $offset, strlen($signature)) === $signature) {
                     return MagicByteResult::pass($declaredMime);
@@ -124,6 +132,16 @@ class MagicByteValidator
      */
     public function detectMimeFromBytes(string $header): ?string
     {
+        if ($this->matchesSpecializedContainerFormat($header, 'image/webp')) {
+            return 'image/webp';
+        }
+
+        foreach (['image/avif', 'image/heic', 'image/heif', 'video/mp4'] as $mime) {
+            if ($this->matchesSpecializedContainerFormat($header, $mime)) {
+                return $mime;
+            }
+        }
+
         foreach (self::SIGNATURES as $mime => $signatures) {
             if (empty($signatures)) {
                 continue;
@@ -136,6 +154,20 @@ class MagicByteValidator
         }
 
         return null;
+    }
+
+    protected function matchesSpecializedContainerFormat(string $header, string $mime): bool
+    {
+        return match ($mime) {
+            'image/webp' => substr($header, 0, 4) === 'RIFF' && substr($header, 8, 4) === 'WEBP',
+            'video/avi' => substr($header, 0, 4) === 'RIFF' && substr($header, 8, 4) === 'AVI ',
+            'audio/wav' => substr($header, 0, 4) === 'RIFF' && substr($header, 8, 4) === 'WAVE',
+            'image/avif' => substr($header, 4, 8) === 'ftypavif' || substr($header, 4, 8) === 'ftypavis',
+            'image/heic' => in_array(substr($header, 4, 8), ['ftypheic', 'ftypheix', 'ftypheim', 'ftypheis'], true),
+            'image/heif' => in_array(substr($header, 4, 8), ['ftypmif1', 'ftypheif', 'ftypheic'], true),
+            'video/mp4' => substr($header, 4, 4) === 'ftyp',
+            default => false,
+        };
     }
 }
 

@@ -13,6 +13,19 @@ namespace VendorShield\Shield\Guards\Upload;
 class PolyglotDetector
 {
     /**
+     * Strong secondary signatures that are meaningful when embedded away from offset 0.
+     * Weak 2-byte signatures like BM/MZ are too collision-prone for generic binary data.
+     */
+    protected const EMBEDDED_SECONDARY_HEADERS = [
+        'php' => '<?php',
+        'script' => '<script',
+        'zip' => "PK\x03\x04",
+        'rar' => 'Rar!',
+        'pdf' => '%PDF',
+        'elf' => "\x7FELF",
+    ];
+
+    /**
      * Known file magic signatures for polyglot header scan.
      */
     protected const FILE_HEADERS = [
@@ -131,16 +144,12 @@ class PolyglotDetector
         }
 
         $findings = [];
-        $detectedTypes = [];
+        $detectedTypes = $this->detectPrimaryTypes($content);
+        $embeddedTypes = $this->detectEmbeddedTypes($content);
 
-        foreach (self::FILE_HEADERS as $type => $signature) {
-            // Check at offset 0 (primary header)
-            if (str_starts_with($content, $signature)) {
-                $detectedTypes[] = $type;
-            }
-            // Also check if signatures appear anywhere in first 1KB
-            if (! str_starts_with($content, $signature) && str_contains($content, $signature)) {
-                $detectedTypes[] = "{$type}(embedded)";
+        foreach ($embeddedTypes as $embeddedType) {
+            if (! in_array($embeddedType, $detectedTypes, true)) {
+                $detectedTypes[] = "{$embeddedType}(embedded)";
             }
         }
 
@@ -153,6 +162,43 @@ class PolyglotDetector
         }
 
         return $findings;
+    }
+
+    /**
+     * Detect primary file headers at offset 0 only.
+     *
+     * @return array<int, string>
+     */
+    protected function detectPrimaryTypes(string $content): array
+    {
+        $detectedTypes = [];
+
+        foreach (self::FILE_HEADERS as $type => $signature) {
+            if (str_starts_with($content, $signature)) {
+                $detectedTypes[] = $type;
+            }
+        }
+
+        return $detectedTypes;
+    }
+
+    /**
+     * Detect strong embedded secondary headers at non-trivial offsets.
+     *
+     * @return array<int, string>
+     */
+    protected function detectEmbeddedTypes(string $content): array
+    {
+        $detectedTypes = [];
+
+        foreach (self::EMBEDDED_SECONDARY_HEADERS as $type => $signature) {
+            $position = strpos($content, $signature);
+            if ($position !== false && $position >= 32) {
+                $detectedTypes[] = $type;
+            }
+        }
+
+        return $detectedTypes;
     }
 
     /**

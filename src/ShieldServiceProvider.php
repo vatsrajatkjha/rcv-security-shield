@@ -19,6 +19,7 @@ use VendorShield\Shield\Contracts\AuditDriverContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Contracts\PolicyLoaderContract;
 use VendorShield\Shield\Contracts\TenantResolverContract;
+use VendorShield\Shield\Contracts\ThreatDriverContract;
 use VendorShield\Shield\Guards\AuthGuard;
 use VendorShield\Shield\Guards\CacheGuard;
 use VendorShield\Shield\Guards\DatabaseGuard;
@@ -41,6 +42,10 @@ use VendorShield\Shield\Policy\PolicyLoader;
 use VendorShield\Shield\Runtime\RuntimeHookManager;
 use VendorShield\Shield\Tenant\HeaderTenantResolver;
 use VendorShield\Shield\Tenant\TenantContext;
+use VendorShield\Shield\Threat\DatabaseThreatDriver;
+use VendorShield\Shield\Threat\LogThreatDriver;
+use VendorShield\Shield\Threat\NullThreatDriver;
+use VendorShield\Shield\Threat\ThreatLogger;
 
 class ShieldServiceProvider extends ServiceProvider
 {
@@ -100,6 +105,28 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(AuditLogger::class, function ($app) {
             return new AuditLogger(
                 $app->make(AuditDriverContract::class),
+                $app->make(ConfigResolver::class),
+                $app->make(ThreatLogger::class),
+            );
+        });
+
+        // Threat Driver
+        $this->app->singleton(ThreatDriverContract::class, function ($app) {
+            $config = $app->make(ConfigResolver::class);
+            $driver = $config->get('threats.driver', 'database');
+
+            return match ($driver) {
+                'database' => new DatabaseThreatDriver($config),
+                'log' => new LogThreatDriver($config->get('threats.channel')),
+                'null' => new NullThreatDriver,
+                default => new DatabaseThreatDriver($config),
+            };
+        });
+
+        // Threat Logger
+        $this->app->singleton(ThreatLogger::class, function ($app) {
+            return new ThreatLogger(
+                $app->make(ThreatDriverContract::class),
                 $app->make(ConfigResolver::class),
             );
         });

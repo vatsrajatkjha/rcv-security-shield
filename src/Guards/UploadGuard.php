@@ -62,6 +62,13 @@ class UploadGuard implements GuardContract
         'png' => ['image/png'],
         'gif' => ['image/gif'],
         'webp' => ['image/webp'],
+        'bmp' => ['image/bmp'],
+        'tif' => ['image/tiff'],
+        'tiff' => ['image/tiff'],
+        'ico' => ['image/x-icon', 'image/vnd.microsoft.icon'],
+        'avif' => ['image/avif'],
+        'heic' => ['image/heic', 'image/heif'],
+        'heif' => ['image/heif', 'image/heic'],
         'pdf' => ['application/pdf'],
         'txt' => ['text/plain'],
         'csv' => ['text/csv', 'text/plain'],
@@ -302,7 +309,7 @@ class UploadGuard implements GuardContract
         }
 
         // XSS/Command Injection in filename
-        if (preg_match('/[;<>\"\' =]/i', $rawName)) {
+        if (preg_match('/[;<>\"\'`|]/i', $rawName)) {
             return $this->failResult(
                 "Filename contains illegal characters: {$rawName}",
                 Severity::High,
@@ -449,8 +456,8 @@ class UploadGuard implements GuardContract
     {
         $extension = strtolower($file->getClientOriginalExtension());
         $allowedMimes = $this->config->guard('upload', 'allowed_mimes', []);
-        $serverMime = (string) $file->getMimeType();
-        $clientMime = (string) $file->getClientMimeType();
+        $serverMime = $this->normalizeMime((string) $file->getMimeType());
+        $clientMime = $this->normalizeMime((string) $file->getClientMimeType());
 
         if (! empty($allowedMimes) && ! in_array($serverMime, $allowedMimes, true)) {
             return $this->failResult(
@@ -588,6 +595,12 @@ class UploadGuard implements GuardContract
      */
     protected function checkContent(UploadedFile $file, string $scanPath): GuardResult
     {
+        // Raster images are already validated by extension, MIME, magic bytes, and polyglot checks.
+        // Running text-oriented payload scanning against them causes avoidable false positives.
+        if ($this->shouldSkipDeepContentScan($file)) {
+            return GuardResult::pass($this->name());
+        }
+
         $fullScan = $this->config->guard('upload', 'full_content_scan', true);
         $maxScanBytes = $fullScan ? 0 : $this->config->guard('upload', 'content_scan_bytes', 8192);
 
@@ -695,5 +708,41 @@ class UploadGuard implements GuardContract
         });
 
         FailSafe::dispatch(fn () => $this->audit->guardEvent($this->name(), 'upload_threat', $result));
+    }
+
+    protected function shouldSkipDeepContentScan(UploadedFile $file): bool
+    {
+        $mime = $this->normalizeMime((string) $file->getMimeType());
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+
+        $rasterMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/bmp',
+            'image/tiff',
+            'image/x-icon',
+            'image/vnd.microsoft.icon',
+            'image/avif',
+            'image/heic',
+            'image/heif',
+        ];
+
+        $rasterExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'ico', 'avif', 'heic', 'heif'];
+
+        return in_array($mime, $rasterMimes, true) || in_array($extension, $rasterExtensions, true);
+    }
+
+    protected function normalizeMime(string $mime): string
+    {
+        return match (strtolower(trim($mime))) {
+            'image/jpg', 'image/pjpeg' => 'image/jpeg',
+            'image/x-png' => 'image/png',
+            'image/x-icon', 'image/vnd.microsoft.icon' => 'image/x-icon',
+            'image/heic-sequence' => 'image/heic',
+            'image/heif-sequence' => 'image/heif',
+            default => strtolower(trim($mime)),
+        };
     }
 }

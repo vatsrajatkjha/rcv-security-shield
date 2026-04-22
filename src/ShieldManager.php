@@ -9,6 +9,7 @@ use VendorShield\Shield\Contracts\GuardContract;
 use VendorShield\Shield\Contracts\IntelligenceClientContract;
 use VendorShield\Shield\Policy\PolicyEngine;
 use VendorShield\Shield\Tenant\TenantContext;
+use VendorShield\Shield\Threat\ThreatLogger;
 
 class ShieldManager
 {
@@ -127,6 +128,14 @@ class ShieldManager
     public function audit(): AuditLogger
     {
         return $this->app->make(AuditLogger::class);
+    }
+
+    /**
+     * Access the threat logger.
+     */
+    public function threats(): ThreatLogger
+    {
+        return $this->app->make(ThreatLogger::class);
     }
 
     /**

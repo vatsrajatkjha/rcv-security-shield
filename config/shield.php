@@ -269,6 +269,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'threats' => [
+        'enabled' => env('SHIELD_THREATS_ENABLED', true),
+        'driver' => env('SHIELD_THREATS_DRIVER', 'database'), // database|log|null
+        'channel' => env('SHIELD_THREATS_CHANNEL', null), // for log driver
         'table' => 'shield_threat_logs',
         'retention_days' => env('SHIELD_THREAT_RETENTION', 365),
     ],
